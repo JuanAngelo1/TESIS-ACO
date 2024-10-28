@@ -63,7 +63,7 @@ int main(int argc, char** argv) {
     
     int numHormigas = 100;
     int iterMax = 100;
-    int tolerancia = 10;
+    int tolerancia = 20;
     double alpha = 1.0;
     double beta = 2.0;
     double tasaEva = 0.5; 
@@ -75,13 +75,16 @@ int main(int argc, char** argv) {
     double maxY = vehiculo.getAncho(); // Dimensión máxima Y (ancho)
     double maxZ = vehiculo.getAlto(); // Dimensión máxima Z (altura)
     
+    double pesoMax= vehiculo.getPesoMaximo();
+    double volMax= vehiculo.getVolMaximo();
+    
     int posxProducto=1;
     int numIter=0;
     int sinMej=0;
     int cantNodos,numAristas;
     Solucion mejorSol;
     
-    while(numIter < 20 && sinMej < tolerancia){
+    while(numIter < 1 && sinMej < tolerancia){
         cout << "Iteración: " << numIter + 1 << endl;
         
         Grafo grafo;
@@ -110,7 +113,8 @@ int main(int argc, char** argv) {
         for(int h = 0 ; h < 1 ; h++){
             Hormiga& hormiga = hormigas[h];
            
-            //se construye la solu
+            hormiga.iniciarSolu(volMax,pesoMax);
+            //Se construye la solu
             solActual=construirSolu(grafo,productosCargar,hormiga,alpha,beta,tasaEva,vehiculo); 
             
             if(solActual.getEsValida())

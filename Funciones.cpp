@@ -117,7 +117,7 @@ vector <Vehiculo> obtenerVehiculos(){
     
     vector<Vehiculo> listaVehiculos;
     
-    Vehiculo camioneta(1,"camioneta", 2500, 4.0, 2.0, 2.0, 10);    
+    Vehiculo camioneta(1,"camioneta", 1000, 4.0, 2.0, 2.0, 10);    
     Vehiculo furgonetaPequena(2,"furgonetaPequena" ,800, 3.0, 1.7, 1.6, 12);
     Vehiculo furgonetaMediana(3,"furgonetaMediana" ,1200, 4.0, 1.8, 2.0, 9);
     Vehiculo furgonetaGrande(4,"furgonetaGrande", 1500, 4.5, 2.0, 2.2, 8);
@@ -204,14 +204,13 @@ Solucion construirSolu(Grafo& grafo, vector<Producto>& productos, Hormiga& hormi
     
     // Nodo inicial aleatorio para la hormiga
     Nodo* nodoActual = hormiga.obtenerNodoActual();
-    hormiga.iniciarEnNodo(nodoActual);
+    Producto& primerProducto = productos[nodoActual->getIdProducto() - 1]; 
     
     //Guardamos el primer Nodo y primer Producto en Hormiga
-    Producto& primerProducto = productos[nodoActual->getIdProducto() - 1];
-    hormiga.guardarProducto(primerProducto,nodoActual);
-    
+    hormiga.iniciarEnNodo(nodoActual,primerProducto);
+
     int i = 0, maxIter = 40;
-    int iterSinAvance = 0, maxIterSinAvance = 20; // Límite de iteraciones sin avance
+    int iterSinAvance = 0, maxIterSinAvance = 20;
 
     // Recorre el grafo construyendo una solución
     while (!hormiga.esSolucionCompleta(productos) && iterSinAvance<maxIterSinAvance) {
@@ -278,14 +277,8 @@ Solucion construirSolu(Grafo& grafo, vector<Producto>& productos, Hormiga& hormi
     
     Solucion soluFinal= hormiga.obtenerSolucion();
     soluFinal.imprimirProductosCargados();
-   
-    cout<<"Peso Cargado: "<< soluFinal.getPesoTotalCargado()<<endl;
-    cout<<"Peso Restante: "<< soluFinal.getPesoRestante()<<endl<<endl;
-    
-    cout<<"Volumen Cargado: "<< soluFinal.getVolumenTotalCargado()<<endl;
-    cout<<"Volumen Restante: "<< soluFinal.getEspacioRestante()<<endl<<endl;
-    
-    
+    soluFinal.imprimirSolu();
+
     return hormiga.obtenerSolucion();
 }
 

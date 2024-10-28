@@ -62,8 +62,18 @@ public:
         nodosOcupados.push_back(nodo);  // Continuar almacenando los nodos
 
         volumenTotalCargado += producto.getVolumen();
-        pesoTotalCargado += producto.getPeso();
         volRestante -= producto.getVolumen();
+        
+        pesoTotalCargado += producto.getPeso();
+        pesoRestante -= producto.getPeso();
+
+    }
+    
+    void iniciarSolu(double vol, double peso){
+        pesoRestante=peso;
+        volRestante=vol;
+        volumenTotalCargado=0;
+        pesoTotalCargado=0;
     }
 
     // Método para obtener el fitness (lo puedes ajustar según los criterios de optimización que desees)
@@ -100,7 +110,16 @@ public:
         }
         cout <<endl;
         cout<<"Cantidad Productos: "<<i<<endl;
-}
+    }
+    
+    void imprimirSolu() const{
+        
+        cout<<"Peso Cargado: "<< pesoTotalCargado <<endl;
+        cout<<"Peso Restante: "<< pesoRestante <<endl<<endl;
+
+        cout<<"Volumen Cargado: "<< volumenTotalCargado<<endl;
+        cout<<"Volumen Restante: "<< volRestante <<endl<<endl;
+    }
 
 
 
