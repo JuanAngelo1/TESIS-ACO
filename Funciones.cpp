@@ -210,10 +210,11 @@ Solucion construirSolu(Grafo& grafo, vector<Producto>& productos, Hormiga& hormi
     Producto& primerProducto = productos[nodoActual->getIdProducto() - 1];
     hormiga.guardarProducto(primerProducto,nodoActual);
     
-    int i = 0, maxIter = 20;
+    int i = 0, maxIter = 40;
+    int iterSinAvance = 0, maxIterSinAvance = 20; // Límite de iteraciones sin avance
 
     // Recorre el grafo construyendo una solución
-    while (!hormiga.esSolucionCompleta(productos) && i < maxIter) {
+    while (!hormiga.esSolucionCompleta(productos) && iterSinAvance<maxIterSinAvance) {
         
         cout << "Construyendo solución, iteración " << i + 1 << endl;
         
@@ -250,7 +251,7 @@ Solucion construirSolu(Grafo& grafo, vector<Producto>& productos, Hormiga& hormi
 
         if (resultado == PUDO_APILAR || resultado == NO_HAY_COLISION) {
             if(resultado == PUDO_APILAR)
-                cout<<"Producto Apilado :o"<<endl;
+                cout<<"-----------Producto Apilado-----------"<<endl;
             if (resultado == NO_HAY_COLISION) {
                 // Crear un nuevo espacio si no hubo colisión
                 crearNuevoEspacio(coordenadasNodoDestino, espacios, productoDestino, coordenadasNodoDestino.x, coordenadasNodoDestino.y, 0, vehiculo.getAlto());
@@ -260,16 +261,31 @@ Solucion construirSolu(Grafo& grafo, vector<Producto>& productos, Hormiga& hormi
             hormiga.guardarProducto(productoDestino,nodoSiguiente);
             hormiga.moverAlSiguienteNodo(nodoSiguiente);
             nodoActual=nodoSiguiente;
+            iterSinAvance=0;
         } else {
-            // No se pudo apilar, se intentará en la siguiente iteración
-            continue;
+            if(resultado == NO_SE_PUDO_APILAR)
+                cout<<"-----------NO SE PUDO APILAR-----------"<<endl;
+            iterSinAvance++;
+//            continue;
         }
 
         i++;
     }
     
-    hormiga.obtenerSolucion().imprimirProductosCargados();
-
+    if (iterSinAvance >= maxIterSinAvance) {
+        cout << "Se alcanzó el límite de iteraciones sin avance, finalizando la construcción." << endl;
+    }
+    
+    Solucion soluFinal= hormiga.obtenerSolucion();
+    soluFinal.imprimirProductosCargados();
+   
+    cout<<"Peso Cargado: "<< soluFinal.getPesoTotalCargado()<<endl;
+    cout<<"Peso Restante: "<< soluFinal.getPesoRestante()<<endl<<endl;
+    
+    cout<<"Volumen Cargado: "<< soluFinal.getVolumenTotalCargado()<<endl;
+    cout<<"Volumen Restante: "<< soluFinal.getEspacioRestante()<<endl<<endl;
+    
+    
     return hormiga.obtenerSolucion();
 }
 

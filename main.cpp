@@ -81,14 +81,14 @@ int main(int argc, char** argv) {
     int cantNodos,numAristas;
     Solucion mejorSol;
     
-    while(numIter < 1 && sinMej < tolerancia){
+    while(numIter < 20 && sinMej < tolerancia){
         cout << "Iteración: " << numIter + 1 << endl;
         
         Grafo grafo;
         cantNodos=grafo.generarNodosAleatorios(productosCargar, maxX, maxY, posxProducto);
-        numAristas=cantNodos*18;
+        numAristas=cantNodos*30;
         
-        grafo.generarAristasAleatorias(numAristas);
+        grafo.generarAristasAleatorias(numAristas,20);
         
         grafo.conectarProductos(productosCargar.size(), posxProducto);
         
@@ -128,5 +128,15 @@ int main(int argc, char** argv) {
         
         numIter++;
     }
+        cout<<"FINAL:---------------------------------------"<<endl;
+    
+        mejorSol.imprimirProductosCargados();
+
+        cout<<"Peso Cargado: "<< mejorSol.getPesoTotalCargado()<<endl;
+        cout<<"Peso Restante: "<< mejorSol.getPesoRestante()<<endl<<endl;
+
+        cout<<"Volumen Cargado: "<< mejorSol.getVolumenTotalCargado()<<endl;
+        cout<<"Volumen Restante: "<< mejorSol.getEspacioRestante()<<endl<<endl;
+
     
 }

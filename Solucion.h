@@ -93,10 +93,13 @@ public:
     
     void imprimirProductosCargados() const {
         cout << "IDs de productos cargados: ";
+        int i=0;
         for (int id : idsProductosCargados) {
             cout << id << " ";
+            i++;
         }
         cout <<endl;
+        cout<<"Cantidad Productos: "<<i<<endl;
 }
 
 

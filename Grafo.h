@@ -66,24 +66,46 @@ public:
         }
     }
 
-    // Generar conexiones aleatorias entre nodos
-    void generarAristasAleatorias(int numAristas) {
+        // Generar conexiones aleatorias entre nodos
+    void generarAristasAleatorias(int numAristas, int minConexiones) {
+        // Paso 1: Asegurar conexiones mínimas para cada nodo
+        for (int i = 0; i < nodos.size(); ++i) {
+            int conexionesActuales = 0;
+
+            // Conectar el nodo actual hasta alcanzar el mínimo de conexiones requerido
+            while (conexionesActuales < minConexiones) {
+                int nodo2 = rand() % nodos.size();
+
+                // Evitar conectar el nodo consigo mismo o al mismo producto
+                if (nodo2 != i && nodos[i]->getIdProducto() != nodos[nodo2]->getIdProducto()) {
+                    // Verificar si ya existe la conexión para evitar duplicados
+                    if (!existeConexion(i, nodo2)) {
+                        Arista* nuevaArista = new Arista(nodos[i], nodos[nodo2]);
+                        aristas.push_back(nuevaArista);
+                        conexionesActuales++;
+                    }
+                }
+            }
+        }
+
+        // Paso 2: Generar el resto de las conexiones aleatorias
         for (int i = 0; i < numAristas; ++i) {
             int nodo1 = rand() % nodos.size();
             int nodo2 = rand() % nodos.size();
 
-            // Evitar conectar nodos del mismo producto
+            // Evitar conectar nodos consigo mismos o del mismo producto
             while (nodo2 == nodo1 || nodos[nodo1]->getIdProducto() == nodos[nodo2]->getIdProducto()) {
                 nodo2 = rand() % nodos.size();
             }
 
+            // Verificar si la conexión no existe antes de crearla
             if (!existeConexion(nodo1, nodo2)) {
                 Arista* nuevaArista = new Arista(nodos[nodo1], nodos[nodo2]);
                 aristas.push_back(nuevaArista);
             }
-            
         }
     }
+
     
     vector<Arista*> obtenerAristasDisponibles(Nodo* nodoActual) const {
         vector<Arista*> aristasDisponibles;
