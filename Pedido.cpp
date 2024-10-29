@@ -40,7 +40,7 @@ Pedido::Pedido(int id,vector <Producto> prods,int hora, string prio){
         
         vector <Producto> prods=productos;
         
-        double totalVolumen;
+        double totalVolumen=0;
         
         for(Producto prod: prods)
             totalVolumen+=prod.getVolumen();
@@ -51,7 +51,7 @@ Pedido::Pedido(int id,vector <Producto> prods,int hora, string prio){
     double Pedido::getPesoTotalProductos()const{
         vector <Producto> prods=productos;
         
-        double totalPeso;
+        double totalPeso=0;
         
         for(Producto prod: prods)
             totalPeso+=prod.getPeso();

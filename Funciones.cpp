@@ -22,6 +22,13 @@
 
 using namespace std;
 
+int obtenerCantidad(vector<Producto> productos){
+    int i=0;
+    for(Producto prod : productos){
+        i++;
+    }
+    return i;
+}
 
 vector<Producto> obtenerProductosBase(){
     
@@ -49,7 +56,7 @@ vector<Producto> obtenerProductosBase(){
     
     //Microondas
     Producto microondas_1(301, "Horno Microonda Panasonic NN-GT34JBRPK", 15.4, 0.55, 0.34, 0.42, 10);
-    Producto microondas_2(302, "Horno Microondas Indurama MWI-20TCRP", 11.23, 0.488, 0.38, 0.29, 10);
+    Producto microondas_2(302, "Horno Microondas Indurama MWI-20TCRP", 11.23, 0.48, 0.38, 0.29, 10);
     Producto microondas_3(303, "Horno Microondas LG MS2536GIS", 11.0, 0.54, 0.417, 0.294, 10);
     
     productosBase.push_back(microondas_1);
@@ -57,10 +64,10 @@ vector<Producto> obtenerProductosBase(){
     productosBase.push_back(microondas_3);
     
     //TV  
-    Producto tv_1(401, "Televisor TCL SMART TV 65 QLED 4K UHD", 17.3, 0.30, 1.44, 89.3 , 0.0);
-    Producto tv_2(402, "Televisor Samsung Smart TV 50 LED 4K UHD", 9.5, 0.23, 1.12, 69.4, 0.0);
-    Producto tv_3(403, "Televisor LG Smart TV 55 Nanocell 4K UHD", 14.1, 0.23, 1.235, 78.0, 0.0);
-    Producto tv_4(404, "Televisor Philips 50 4K Ultra HD Google TV", 9.31, 0.25, 1.11, 71.8, 0.0);
+    Producto tv_1(401, "Televisor TCL SMART TV 65 QLED 4K UHD", 17.3, 0.30, 1.44, 0.83 , 0.0);
+    Producto tv_2(402, "Televisor Samsung Smart TV 50 LED 4K UHD", 9.5, 0.25, 1.12, 0.69, 0.0);
+    Producto tv_3(403, "Televisor LG Smart TV 55 Nanocell 4K UHD", 14.1, 0.23, 1.23, 0.78, 0.0);
+    Producto tv_4(404, "Televisor Philips 50 4K Ultra HD Google TV", 9.31, 0.25, 1.11, 0.71, 0.0);
     
     productosBase.push_back(tv_1);
     productosBase.push_back(tv_2);
@@ -101,8 +108,8 @@ vector<Producto> obtenerProductosBase(){
     productosBase.push_back(cocina_4);
     
     //Licuadoras
-    Producto licuadora_1(801, "Licuadora Miray LIM-9", 1.3, 0.133, 0.225, 0.35, 0);
-    Producto licuadora_2(802, "Licuadora Oster 250-22", 3.74, 0.2381, 0.1937, 0.335, 0);
+    Producto licuadora_1(801, "Licuadora Miray LIM-9", 1.3, 0.133, 0.22, 0.35, 0);
+    Producto licuadora_2(802, "Licuadora Oster 250-22", 3.74, 0.23, 0.19, 0.335, 0);
     Producto licuadora_3(803, "Licuadora Thomas TH-780VR", 4.7, 0.22, 0.29, 0.38, 0);
     
     productosBase.push_back(licuadora_1);
@@ -117,7 +124,7 @@ vector <Vehiculo> obtenerVehiculos(){
     
     vector<Vehiculo> listaVehiculos;
     
-    Vehiculo camioneta(1,"camioneta", 1000, 4.0, 2.0, 2.0, 10);    
+    Vehiculo camioneta(1,"camioneta", 1200, 4.5, 2.0, 2.0, 10);    
     Vehiculo furgonetaPequena(2,"furgonetaPequena" ,800, 3.0, 1.7, 1.6, 12);
     Vehiculo furgonetaMediana(3,"furgonetaMediana" ,1200, 4.0, 1.8, 2.0, 9);
     Vehiculo furgonetaGrande(4,"furgonetaGrande", 1500, 4.5, 2.0, 2.2, 8);
@@ -152,6 +159,8 @@ Vehiculo SeleccionarVehiculo(Pedido ped, vector<Vehiculo> lista){
     
     Vehiculo vehiculoSeleccionado = lista[0];
     bool encontrado = false;
+    
+//    cout<<"Volumen Pedidos:"<<ped.getVolumenTotalProductos()<<endl;
 
     for (Vehiculo v : lista) {
         // Primero, verificamos si la hora de salida del vehículo coincide con la prioridad
@@ -204,21 +213,16 @@ Solucion construirSolu(Grafo& grafo, vector<Producto>& productos, Hormiga& hormi
     
     // Nodo inicial aleatorio para la hormiga
     Nodo* nodoActual = hormiga.obtenerNodoActual();
-    Producto& primerProducto = productos[nodoActual->getIdProducto() - 1]; 
-    
-    //Guardamos el primer Nodo y primer Producto en Hormiga
-    hormiga.iniciarEnNodo(nodoActual,primerProducto);
 
-    int i = 0, maxIter = 40;
+    int i = 0;
     int iterSinAvance = 0, maxIterSinAvance = 20;
 
     // Recorre el grafo construyendo una solución
     while (!hormiga.esSolucionCompleta(productos) && iterSinAvance<maxIterSinAvance) {
         
-        cout << "Construyendo solución, iteración " << i + 1 << endl;
+//        cout << "Construyendo solución, iteración " << i + 1 << endl;
         
-        nodoActual->mostrarInfo();
-        // Obtener Aristas del NodoActual
+//        nodoActual->mostrarInfo();
         
         vector<Arista*> aristasDisponibles = grafo.obtenerAristasDisponibles(nodoActual);
         vector<Arista*> aristasFiltradas = filtrarAristas(aristasDisponibles, productos, hormiga.obtenerSolucion());
@@ -231,7 +235,7 @@ Solucion construirSolu(Grafo& grafo, vector<Producto>& productos, Hormiga& hormi
         // Seleccionar una arista basado en probabilidades de feromona y heurística
         Arista* aristaSeleccionada = calcularYSeleccionarArista(aristasFiltradas, espacios, productos, alpha, beta);
         
-        aristaSeleccionada->mostrarInfo(1);
+//        aristaSeleccionada->mostrarInfo(1);
 
         if (!aristaSeleccionada) {
             cout << "No se pudo seleccionar una arista válida, terminando." << endl;
@@ -249,8 +253,8 @@ Solucion construirSolu(Grafo& grafo, vector<Producto>& productos, Hormiga& hormi
         ResultadoEspacio resultado = buscarEspacioDisponible(coordenadasNodoDestino, espacios, productoDestino, coordenadasNodoDestino.x, coordenadasNodoDestino.y);
 
         if (resultado == PUDO_APILAR || resultado == NO_HAY_COLISION) {
-            if(resultado == PUDO_APILAR)
-                cout<<"-----------Producto Apilado-----------"<<endl;
+//            if(resultado == PUDO_APILAR)
+//                cout<<"-----------Producto Apilado-----------"<<endl;
             if (resultado == NO_HAY_COLISION) {
                 // Crear un nuevo espacio si no hubo colisión
                 crearNuevoEspacio(coordenadasNodoDestino, espacios, productoDestino, coordenadasNodoDestino.x, coordenadasNodoDestino.y, 0, vehiculo.getAlto());
@@ -262,8 +266,8 @@ Solucion construirSolu(Grafo& grafo, vector<Producto>& productos, Hormiga& hormi
             nodoActual=nodoSiguiente;
             iterSinAvance=0;
         } else {
-            if(resultado == NO_SE_PUDO_APILAR)
-                cout<<"-----------NO SE PUDO APILAR-----------"<<endl;
+//            if(resultado == NO_SE_PUDO_APILAR)
+//                cout<<"-----------NO SE PUDO APILAR-----------"<<endl;
             iterSinAvance++;
 //            continue;
         }
@@ -271,13 +275,17 @@ Solucion construirSolu(Grafo& grafo, vector<Producto>& productos, Hormiga& hormi
         i++;
     }
     
-    if (iterSinAvance >= maxIterSinAvance) {
-        cout << "Se alcanzó el límite de iteraciones sin avance, finalizando la construcción." << endl;
+    if (iterSinAvance >= maxIterSinAvance || !hormiga.esSolucionCompleta(productos)) {
+        hormiga.obtenerSolucion().setEsValida(false);
+        cout << "Se alcanzó el límite de iteraciones sin avance o la solució no es completa, solucion no valida" << endl;
     }
     
     Solucion soluFinal= hormiga.obtenerSolucion();
+    
+    hormiga.setEspaciosSolucion(espacios);
+    
     soluFinal.imprimirProductosCargados();
-    soluFinal.imprimirSolu();
+//    soluFinal.imprimirSolu();
 
     return hormiga.obtenerSolucion();
 }

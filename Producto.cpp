@@ -55,6 +55,7 @@ Producto::Producto() : id_producto(0), nombre(""), peso(0.0), largo(0.0), ancho(
         cout << "ID: " << id_producto 
              << " | Nombre: " << nombre 
              << " | Peso: " << peso << " kg"
+             << " | Volumen: "<<volumen<<"m3"
              << " | Dimensiones: " << largo << " x " << ancho << " x " << alto << " m"
              << " | Límite de Peso: " << limitePeso << " kg";
         cout << endl;

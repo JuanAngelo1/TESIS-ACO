@@ -28,12 +28,11 @@ public:
     Hormiga() : nodoActual(nullptr) {}
 
     // Inicializa la hormiga en un nodo inicial
-    void iniciarEnNodo(Nodo* nodoInicial, Producto& primerProducto) {
+    void iniciarEnNodo(Nodo* nodoInicial) {
         nodoActual = nodoInicial;
         recorrido.clear();            // Limpiar el recorrido anterior
         recorrido.push_back(nodoActual); // Añadir el nodo inicial al recorrido
-        
-        guardarProducto(primerProducto,nodoInicial);
+       
     }
 
     // Moverse al siguiente nodo
@@ -49,15 +48,23 @@ public:
     Solucion obtenerSolucion() const {
         return solucionActual;
     }
-
+    
+    void guardarPrimerProducto(Producto producto) {
+        // Lógica para agregar el producto y espacio a la solución
+        solucionActual.agregarPrimerProducto(producto);
+    }
+    
     void guardarProducto(Producto producto, Nodo* nodo) {
         // Lógica para agregar el producto y espacio a la solución
         solucionActual.agregarProducto(nodo, producto);
     }
     
-    void iniciarSolu(double a,double b){
+    void iniciarSolu(double a,double b, vector<Producto> productos){
         solucionActual = Solucion();
         solucionActual.iniciarSolu(a,b);
+        
+        Producto& primerProducto = productos[nodoActual->getIdProducto() - 1]; 
+        guardarPrimerProducto(primerProducto);
     }
 
     Nodo* obtenerNodoActual() const {
@@ -74,6 +81,10 @@ public:
     
     void imprimirSolucion() const{
         solucionActual.imprimirSolu();
+    }
+    
+    void setEspaciosSolucion(const map<Coordenada, Espacio>& nuevosEspacios){
+        solucionActual.setEspaciosSolucion(nuevosEspacios);
     }
 };
 

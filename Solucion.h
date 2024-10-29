@@ -12,10 +12,12 @@
 #include <vector>
 #include <iostream>
 #include <algorithm> 
+#include <map>
 #include <unordered_set>
 #include "Nodo.h"
 #include "Producto.h"
-
+#include "Espacio.h"
+#include "Coordenada.h"
 
 using namespace std;
 
@@ -25,6 +27,7 @@ private:
     
     vector<Nodo*> nodosOcupados;  
     vector<int> idsProductosCargados;  // Solo los IDs de los productos cargados
+    map<Coordenada, Espacio> espaciosSolucion;  
     double pesoTotalCargado;      
     double volumenTotalCargado;   
     double volRestante;
@@ -53,6 +56,10 @@ public:
         return true;
     }
     
+    void setEspaciosSolucion(const map<Coordenada, Espacio>& nuevosEspacios) {
+        espaciosSolucion = nuevosEspacios;
+    }
+    
     void agregarNodo(Nodo *nodo){
         nodosOcupados.push_back(nodo);
     }
@@ -67,6 +74,18 @@ public:
         pesoTotalCargado += producto.getPeso();
         pesoRestante -= producto.getPeso();
 
+    }
+    
+    void agregarPrimerProducto(Producto producto){
+        
+        idsProductosCargados.push_back(producto.getIdProducto());  // Almacenar solo el ID
+        
+        volumenTotalCargado += producto.getVolumen();
+        volRestante -= producto.getVolumen();
+        
+        pesoTotalCargado += producto.getPeso();
+        pesoRestante -= producto.getPeso();
+        
     }
     
     void iniciarSolu(double vol, double peso){

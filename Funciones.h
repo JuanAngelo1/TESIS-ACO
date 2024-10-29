@@ -24,6 +24,8 @@ enum ResultadoEspacio {
 };
 
 
+int obtenerCantidad(vector<Producto> productos);
+
 Vehiculo SeleccionarVehiculo(Pedido , vector<Vehiculo>);
 
 bool VerificarCompatibilidad(TipoProducto& ,Espacio& );
