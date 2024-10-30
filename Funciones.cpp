@@ -124,15 +124,15 @@ vector <Vehiculo> obtenerVehiculos(){
     
     vector<Vehiculo> listaVehiculos;
     
-    Vehiculo camioneta(1,"camioneta", 1200, 4.5, 2.0, 2.0, 10);    
-    Vehiculo furgonetaPequena(2,"furgonetaPequena" ,800, 3.0, 1.7, 1.6, 12);
-    Vehiculo furgonetaMediana(3,"furgonetaMediana" ,1200, 4.0, 1.8, 2.0, 9);
-    Vehiculo furgonetaGrande(4,"furgonetaGrande", 1500, 4.5, 2.0, 2.2, 8);
+    Vehiculo vehiculo1(1,"Hyundai Mighty EX8", 3000, 4.9, 2.2, 2.2, 10);    
+    Vehiculo vehiculo2(2,"Mercedes-Benz Atego 1725" ,3000, 5.5, 2.0, 2.4, 12);
+    Vehiculo vehiculo3(3,"Isuzu NPR 4 TON" ,3500, 6, 2.0, 2.2, 9);
+    Vehiculo vehiculo4(4,"Hyundai HD78", 4000, 6.5, 2.0, 2.2, 8);
     
-    listaVehiculos.push_back(camioneta);
-    listaVehiculos.push_back(furgonetaPequena);
-    listaVehiculos.push_back(furgonetaMediana);
-    listaVehiculos.push_back(furgonetaGrande);
+    listaVehiculos.push_back(vehiculo1);
+    listaVehiculos.push_back(vehiculo2);
+    listaVehiculos.push_back(vehiculo3);
+    listaVehiculos.push_back(vehiculo4);
     
     return listaVehiculos;
 }
@@ -196,7 +196,7 @@ Vehiculo SeleccionarVehiculo(Pedido ped, vector<Vehiculo> lista){
 Solucion mejorSolucion(vector<Solucion> soluciones){
     
     Solucion mejorSol;
-    mejorSol.setFitness(-100);
+    mejorSol.setFitness(-10000000);
     
     for(Solucion sol: soluciones){
         if(sol.getFitness()> mejorSol.getFitness())
@@ -213,17 +213,19 @@ Solucion construirSolu(Grafo& grafo, vector<Producto>& productos, Hormiga& hormi
     
     // Nodo inicial aleatorio para la hormiga
     Nodo* nodoActual = hormiga.obtenerNodoActual();
-
+    
+    crearPrimerEspacio(hormiga,espacios,vehiculo.getAlto(),productos);
+    
     int i = 0;
     int iterSinAvance = 0, maxIterSinAvance = 20;
-
+    bool soluEncontrada=false;
+    
     // Recorre el grafo construyendo una solución
     while (!hormiga.esSolucionCompleta(productos) && iterSinAvance<maxIterSinAvance) {
         
-//        cout << "Construyendo solución, iteración " << i + 1 << endl;
-        
+//        cout << "Construyendo solución, iteración " << i + 1 << endl;       
 //        nodoActual->mostrarInfo();
-        
+
         vector<Arista*> aristasDisponibles = grafo.obtenerAristasDisponibles(nodoActual);
         vector<Arista*> aristasFiltradas = filtrarAristas(aristasDisponibles, productos, hormiga.obtenerSolucion());
         
@@ -253,13 +255,13 @@ Solucion construirSolu(Grafo& grafo, vector<Producto>& productos, Hormiga& hormi
         ResultadoEspacio resultado = buscarEspacioDisponible(coordenadasNodoDestino, espacios, productoDestino, coordenadasNodoDestino.x, coordenadasNodoDestino.y);
 
         if (resultado == PUDO_APILAR || resultado == NO_HAY_COLISION) {
-//            if(resultado == PUDO_APILAR)
-//                cout<<"-----------Producto Apilado-----------"<<endl;
+
             if (resultado == NO_HAY_COLISION) {
                 // Crear un nuevo espacio si no hubo colisión
                 crearNuevoEspacio(coordenadasNodoDestino, espacios, productoDestino, coordenadasNodoDestino.x, coordenadasNodoDestino.y, 0, vehiculo.getAlto());
+//                imprimirEspaciosSolucion(espacios);
+//                cout<<endl<<endl;   
             }
-            
             // Agregar el nodo destino a la solución
             hormiga.guardarProducto(productoDestino,nodoSiguiente);
             hormiga.moverAlSiguienteNodo(nodoSiguiente);
@@ -269,7 +271,7 @@ Solucion construirSolu(Grafo& grafo, vector<Producto>& productos, Hormiga& hormi
 //            if(resultado == NO_SE_PUDO_APILAR)
 //                cout<<"-----------NO SE PUDO APILAR-----------"<<endl;
             iterSinAvance++;
-//            continue;
+            //continue;
         }
 
         i++;
@@ -279,22 +281,98 @@ Solucion construirSolu(Grafo& grafo, vector<Producto>& productos, Hormiga& hormi
     
     if (iterSinAvance >= maxIterSinAvance || !completa) {
         hormiga.setValidez(false);
-        cout << "Se alcanzó el límite de iteraciones sin avance o la solució no es completa, solucion no valida" << endl;
+//        cout << "No solución" << endl;
     }else{
         hormiga.setValidez(true);
-        cout << "Se encontró una solución completa"<<endl;
+        soluEncontrada=true;
+//        cout << "---Solucion Completa---"<<endl;
     }
         
+    if(soluEncontrada){
+        hormiga.setEspaciosSolucion(espacios);
     
-    Solucion soluFinal= hormiga.obtenerSolucion();
+        Solucion soluFinal= hormiga.obtenerSolucion();
     
-    hormiga.setEspaciosSolucion(espacios);
-    
-    soluFinal.imprimirProductosCargados();
-//    soluFinal.imprimirSolu();
+    //  soluFinal.imprimirEspaciosSolucion();
 
+        soluFinal.imprimirProductosCargados();
+    }
+    
     return hormiga.obtenerSolucion();
 }
+
+
+void crearPrimerEspacio(Hormiga& hormiga,map<Coordenada, Espacio>& espacios, double alturaVehiculo,vector<Producto>& productos){
+    
+    Nodo* nodoActual= hormiga.obtenerNodoActual();
+    
+    Producto& producto = productos[nodoActual->getIdProducto() - 1];
+    
+    double posX=nodoActual->getPosX();
+    double posY=nodoActual->getPosY();
+    
+    Coordenada coordenada(posX, posY);
+    
+    // Crear un nuevo espacio con la altura del primer producto
+    Espacio nuevoEspacio(alturaVehiculo, posX, posY, 0, 0);
+    
+    nuevoEspacio.agregarProducto(&producto);
+    
+    // Agregar el nuevo espacio al mapa de espacios
+    espacios.emplace(coordenada, nuevoEspacio);
+    
+}
+
+void crearNuevoEspacio(const Coordenada& coordenadas, map<Coordenada, Espacio>& espacios, Producto& producto, 
+        double posX, double posY, double posZ, double alturaVehiculo) {
+    
+    // Crear un nuevo espacio con la altura del primer producto
+    Espacio nuevoEspacio(alturaVehiculo, posX, posY, posZ, 0);
+    
+    nuevoEspacio.agregarProducto(&producto);
+    
+    // Asignar las dimensiones del primer producto
+    nuevoEspacio.setLargo(producto.getLargo());
+    nuevoEspacio.setAncho(producto.getAncho());
+
+    // Agregar el nuevo espacio al mapa de espacios
+    espacios.emplace(coordenadas, nuevoEspacio);
+
+}
+
+void imprimirEspaciosSolucion(map<Coordenada, Espacio>& espaciosSolucion)  {
+    
+    
+    for (const pair<const Coordenada, Espacio>& par : espaciosSolucion) {
+        const Coordenada& coord = par.first;
+        const Espacio& espacio = par.second;
+
+        // Imprimir las coordenadas del espacio
+        cout << "Espacio en Coordenada (" << coord.x << ", " << coord.y << "):\n";
+
+        // Crear una copia de la pila de productos para iterar
+        stack<Producto*> copiaPila = espacio.getPilaDeProductos();
+        int productoNum = 1;
+        
+        // Recorrer e imprimir cada producto en la pila
+        while (!copiaPila.empty()) {
+            Producto* producto = copiaPila.top();
+            cout << "  Producto " << productoNum++ << ": "
+                      << "ID = " << producto->getIdProducto() << ", "
+                      << "Nombre = " << producto->getNombre() << ", "
+                      << "Peso = " << producto->getPeso() << " kg, "
+                      << "Volumen = " << producto->getVolumen() << " m3\n";
+            copiaPila.pop();  // Desapilar el producto
+        }
+
+        if (productoNum == 1) {
+            cout << "  (Sin productos apilados en este espacio)\n";
+        }
+        
+        cout << "----------------------------------\n";
+    }
+}
+
 
 
 
@@ -396,22 +474,7 @@ ResultadoEspacio buscarEspacioDisponible(const Coordenada& coordenadasNodo, map<
 }
 
 
-void crearNuevoEspacio(const Coordenada& coordenadas, map<Coordenada, Espacio>& espacios, Producto& producto, 
-        double posX, double posY, double posZ, double alturaVehiculo) {
-    
-    // Crear un nuevo espacio con la altura del primer producto
-    Espacio nuevoEspacio(alturaVehiculo, posX, posY, posZ, producto.getAltura());
-    
-//    nuevoEspacio.agregarProducto(&producto);
-    
-    // Asignar las dimensiones del primer producto
-    nuevoEspacio.setLargo(producto.getLargo());
-    nuevoEspacio.setAncho(producto.getAncho());
 
-    // Agregar el nuevo espacio al mapa de espacios
-    espacios.emplace(coordenadas, nuevoEspacio);
-
-}
 
 
 

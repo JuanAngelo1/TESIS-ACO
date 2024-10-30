@@ -59,5 +59,8 @@ void crearNuevoEspacio(const Coordenada& , map<Coordenada, Espacio>& , Producto&
 
 vector<Arista*> filtrarAristas(const vector<Arista*>& , const vector<Producto>& , const Solucion& );
 
+void crearPrimerEspacio(Hormiga& ,map<Coordenada, Espacio>& , double ,vector<Producto>& );
+
+void imprimirEspaciosSolucion(map<Coordenada, Espacio>& );
 
 #endif /* FUNCIONES_H */

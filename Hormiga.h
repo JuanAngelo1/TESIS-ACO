@@ -66,9 +66,9 @@ public:
     void iniciarSolu(double a,double b, vector<Producto> productos){
         solucionActual = Solucion();
         solucionActual.iniciarSolu(a,b);
-        
+       
         Producto& primerProducto = productos[nodoActual->getIdProducto() - 1]; 
-        guardarPrimerProducto(primerProducto);
+        guardarProducto(primerProducto,nodoActual);
     }
 
     Nodo* obtenerNodoActual() const {

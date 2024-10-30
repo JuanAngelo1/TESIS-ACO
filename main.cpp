@@ -33,14 +33,14 @@ int main(int argc, char** argv) {
     vector<Producto> productosBase = obtenerProductosBase();
     
     //Inicializar cantidades para pedido prueba
-    vector<int> cantidad = {1, 0, 0, 1,   // Refrigeradoras (cuatro)
-                            0, 1, 1,      // Lavadoras (tres modelos)
-                            1, 0, 1,      // Microondas (tres modelos)
-                            1, 0, 0, 1,   // Televisores (cuatro modelos)
-                            0, 0, 1, 1,   // Aspiradoras (cuatro modelos)
-                            0, 1, 0, 1,   // Hornos eléctricos (cuatro modelos)
-                            1, 0, 1, 1,   // Cocinas (cinco modelos)
-                            0, 1, 1};     // Licuadoras (tres modelos)
+    vector<int> cantidad = {1, 0, 1, 1,   // Refrigeradoras (cuatro)
+                            1, 1, 0,      // Lavadoras (tres modelos)
+                            1, 1, 0,      // Microondas (tres modelos)
+                            1, 0, 0, 0,   // Televisores (cuatro modelos)
+                            1, 0, 1, 0,   // Aspiradoras (cuatro modelos)
+                            1, 0, 1, 0,   // Hornos eléctricos (cuatro modelos)
+                            1, 1, 1, 0,   // Cocinas (cinco modelos)
+                            0, 0, 1};     // Licuadoras (tres modelos)
     
     //Productos a cargar generados
     vector<Producto> productosCargar = generarProductos(productosBase,cantidad);
@@ -50,10 +50,10 @@ int main(int argc, char** argv) {
     
     //Prueba productos a cargar
     
-    for(int i=0; i<productosCargar.size();i++){
-        productosCargar[i].mostrarInformacion();
-        cout<<endl;
-    }
+//    for(int i=0; i<productosCargar.size();i++){
+//        productosCargar[i].mostrarInformacion();
+//        cout<<endl;
+//    }
 
     //En caso haya más pedidos se debera realizar bucle
 //    vector<Pedido> listaPedidos;
@@ -61,16 +61,16 @@ int main(int argc, char** argv) {
     
     //Parametros ACO
     
-    int numHormigas = 100;
+    int numHormigas = 40;
     int iterMax = 100;
     int tolerancia = 20;
     double alpha = 1.0;
     double beta = 2.0;
     double tasaEva = 0.5; 
     
-    double coefV=1.2;
-    double coefVa=0.2;
-    double coefEsta=0.5;
+    double coefV=0.65;
+    double coefVa=0.10;
+    double coefEsta=0.25;
     
     Colonia colonia(numHormigas,iterMax,tasaEva,alpha,beta);
     
@@ -82,24 +82,25 @@ int main(int argc, char** argv) {
     double pesoMax= vehiculo.getPesoMaximo();
     double volMax= vehiculo.getVolMaximo();
     
-    int posxProducto=3;
+    int posxProducto=4;
     int numIter=0;
     int sinMej=0;
     int cantNodos,numAristas;
     Solucion mejorSol;
+    mejorSol.setFitness(-10000);
     
     int cantProductos=obtenerCantidad(productosCargar);
     
     cout<<"Cantidad Productos a Cargar: "<<cantProductos<< endl;
     
-    while(numIter < 1 && sinMej < tolerancia){
+    while(numIter < 5 && sinMej < tolerancia){
         cout << "Iteración: " << numIter + 1 << endl;
         
         Grafo grafo;
         cantNodos=grafo.generarNodosAleatorios(productosCargar, maxX, maxY, posxProducto);
-        numAristas=cantNodos*35;
+        numAristas=cantNodos*30;
         
-        grafo.generarAristasAleatorias(numAristas,30);
+        grafo.generarAristasAleatorias(numAristas,100);
         
         grafo.conectarProductos(productosCargar.size(), posxProducto);
         
@@ -114,18 +115,19 @@ int main(int argc, char** argv) {
         colonia.inicializarColonia(grafo);
         vector<Hormiga> hormigas=colonia.getHormigas();
         Solucion solActual;
-        
+
         
         //Aqui las hormigas recorren el grafo
-        for(int h = 0 ; h < 20 ; h++){
+        for(int h = 0 ; h < numHormigas ; h++){
             Hormiga& hormiga = hormigas[h];
-           
+
             hormiga.iniciarSolu(volMax,pesoMax,productosCargar);
             
             //Se construye la solu
             solActual=construirSolu(grafo,productosCargar,hormiga,alpha,beta,tasaEva,vehiculo); 
             
             if(solActual.getEsValida()){ 
+                cout<<"Sol Encontrada"<<endl<<endl;
                 solActual.calcularFitness(vehiculo,coefV,coefVa,coefEsta);
                 soluciones.push_back(solActual);
             }
@@ -134,7 +136,7 @@ int main(int argc, char** argv) {
         
         mejorSolIter = mejorSolucion(soluciones);
         
-        if(mejorSolIter.getFitness() < mejorSol.getFitness()){
+        if(mejorSolIter.getFitness() > mejorSol.getFitness()){
             mejorSol=mejorSolIter;
             sinMej=0;
         }else
@@ -148,6 +150,7 @@ int main(int argc, char** argv) {
         mejorSol.imprimirProductosCargados();
 
         mejorSol.imprimirSolu();
-     
-    
+        
+        mejorSol.imprimirEspaciosSolucion();
+        
 }

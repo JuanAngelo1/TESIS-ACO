@@ -192,6 +192,42 @@ public:
         
         cout<<"Fitness Solución: "<< fitness <<endl;
     }
+    
+    
+#include <iostream>
+
+void imprimirEspaciosSolucion() const {
+    
+    
+    for (const pair<const Coordenada, Espacio>& par : espaciosSolucion) {
+        const Coordenada& coord = par.first;
+        const Espacio& espacio = par.second;
+
+        // Imprimir las coordenadas del espacio
+        cout << "Espacio en Coordenada (" << coord.x << ", " << coord.y << "):\n";
+
+        // Crear una copia de la pila de productos para iterar
+        stack<Producto*> copiaPila = espacio.getPilaDeProductos();
+        int productoNum = 1;
+        
+        // Recorrer e imprimir cada producto en la pila
+        while (!copiaPila.empty()) {
+            Producto* producto = copiaPila.top();
+            cout << "  Producto " << productoNum++ << ": "
+                      << "ID = " << producto->getIdProducto() << ", "
+                      << "Nombre = " << producto->getNombre() << ", "
+                      << "Peso = " << producto->getPeso() << " kg, "
+                      << "Volumen = " << producto->getVolumen() << " m3\n";
+            copiaPila.pop();  // Desapilar el producto
+        }
+
+        if (productoNum == 1) {
+            cout << "  (Sin productos apilados en este espacio)\n";
+        }
+        
+        cout << "----------------------------------\n";
+    }
+}
 
 
 
