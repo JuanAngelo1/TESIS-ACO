@@ -14,10 +14,12 @@
 #include <algorithm> 
 #include <map>
 #include <unordered_set>
+#include <math.h>
 #include "Nodo.h"
 #include "Producto.h"
 #include "Espacio.h"
 #include "Coordenada.h"
+#include "Vehiculo.h"
 
 using namespace std;
 
@@ -41,7 +43,56 @@ public:
 
     Solucion(double volumenDisponible, double pesoDisponible) 
         : volRestante(volumenDisponible),pesoRestante(pesoDisponible), pesoTotalCargado(0), volumenTotalCargado(0), fitness(0), esValida(true) {}
+    
+    void calcularFitness(Vehiculo& vehiculo,double coefV, double coefVa, double coefEsta){
+        double fitness=0;
+        double volumenVehiculo= volumenTotalCargado+volRestante;
+        
+        double factorVolumen = (volumenTotalCargado / volumenVehiculo) * coefV;
+        double factorEspacioVacio = (volRestante) * coefVa;
+        double factorDesbalancePeso = calcularDesbalancePeso(vehiculo) * coefEsta;
 
+        // Fitness basado en la fórmula que proporcionaste
+        fitness = factorVolumen - factorEspacioVacio - factorDesbalancePeso;
+
+        // Asignamos el valor del fitness a la solución actual
+        setFitness(fitness);
+    }
+    
+    double calcularDesbalancePeso(const Vehiculo& vehiculo) {
+        double pesoFrontal = 0.0;
+        double pesoTrasero = 0.0;
+
+        // Definimos una coordenada límite que separe la parte frontal de la trasera
+        double limiteFrontal = vehiculo.getAncho() / 2.0;
+
+        for (pair<const Coordenada, Espacio>& espacioPar : espaciosSolucion) {
+            const Coordenada& coord = espacioPar.first;
+            const Espacio& espacio = espacioPar.second;
+
+            // Sumamos el peso de los productos en este espacio
+            double pesoEnEspacio = 0.0;
+
+            // Crear una copia de la pila de productos para iterar sobre ella
+            stack<Producto*> copiaPila = espacio.getPilaDeProductos();
+            while (!copiaPila.empty()) {
+                Producto* producto = copiaPila.top(); // Obtener el producto en la cima
+                pesoEnEspacio += producto->getPeso();  // Acumular el peso
+                copiaPila.pop();  // Eliminar el producto de la copia
+            }
+
+            // Clasificamos el espacio como frontal o trasero según su posición
+            if (coord.y < limiteFrontal) {
+                pesoFrontal += pesoEnEspacio;
+            } else {
+                pesoTrasero += pesoEnEspacio;
+            }
+        }
+
+        // Calculamos el desbalance como la diferencia absoluta
+        return abs(pesoFrontal - pesoTrasero);
+    }
+    
     bool esNodoValido(Nodo* nodo, Producto producto) {
         for (const Nodo* nodoOcupado : nodosOcupados) {
             if (nodo->posicionIgual(*nodoOcupado)) {
@@ -138,6 +189,8 @@ public:
 
         cout<<"Volumen Cargado: "<< volumenTotalCargado<<endl;
         cout<<"Volumen Restante: "<< volRestante <<endl<<endl;
+        
+        cout<<"Fitness Solución: "<< fitness <<endl;
     }
 
 

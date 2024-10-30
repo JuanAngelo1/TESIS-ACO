@@ -49,6 +49,10 @@ public:
         return solucionActual;
     }
     
+    void setValidez(bool valido){
+        solucionActual.setEsValida(valido);
+    }
+    
     void guardarPrimerProducto(Producto producto) {
         // Lógica para agregar el producto y espacio a la solución
         solucionActual.agregarPrimerProducto(producto);

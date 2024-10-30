@@ -35,7 +35,7 @@ public:
     double getAncho() const { return ancho; }
     double getalturaActual() const { return alturaActual; }
     double getalturaMax() const {return alturaMaxima;}
-    
+    stack<Producto*> getPilaDeProductos() const {return pilaDeProductos;}
     
     void setLargo(double la){largo=la;}
     void setAncho(double an){ancho=an;}

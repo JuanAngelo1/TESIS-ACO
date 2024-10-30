@@ -275,10 +275,16 @@ Solucion construirSolu(Grafo& grafo, vector<Producto>& productos, Hormiga& hormi
         i++;
     }
     
-    if (iterSinAvance >= maxIterSinAvance || !hormiga.esSolucionCompleta(productos)) {
-        hormiga.obtenerSolucion().setEsValida(false);
+    bool completa=hormiga.esSolucionCompleta(productos);
+    
+    if (iterSinAvance >= maxIterSinAvance || !completa) {
+        hormiga.setValidez(false);
         cout << "Se alcanzó el límite de iteraciones sin avance o la solució no es completa, solucion no valida" << endl;
+    }else{
+        hormiga.setValidez(true);
+        cout << "Se encontró una solución completa"<<endl;
     }
+        
     
     Solucion soluFinal= hormiga.obtenerSolucion();
     
@@ -395,6 +401,8 @@ void crearNuevoEspacio(const Coordenada& coordenadas, map<Coordenada, Espacio>& 
     
     // Crear un nuevo espacio con la altura del primer producto
     Espacio nuevoEspacio(alturaVehiculo, posX, posY, posZ, producto.getAltura());
+    
+//    nuevoEspacio.agregarProducto(&producto);
     
     // Asignar las dimensiones del primer producto
     nuevoEspacio.setLargo(producto.getLargo());

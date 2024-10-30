@@ -50,10 +50,10 @@ int main(int argc, char** argv) {
     
     //Prueba productos a cargar
     
-//    for(int i=0; i<productosCargar.size();i++){
-//        productosCargar[i].mostrarInformacion();
-//        cout<<endl;
-//    }
+    for(int i=0; i<productosCargar.size();i++){
+        productosCargar[i].mostrarInformacion();
+        cout<<endl;
+    }
 
     //En caso haya más pedidos se debera realizar bucle
 //    vector<Pedido> listaPedidos;
@@ -67,6 +67,10 @@ int main(int argc, char** argv) {
     double alpha = 1.0;
     double beta = 2.0;
     double tasaEva = 0.5; 
+    
+    double coefV=1.2;
+    double coefVa=0.2;
+    double coefEsta=0.5;
     
     Colonia colonia(numHormigas,iterMax,tasaEva,alpha,beta);
     
@@ -113,7 +117,7 @@ int main(int argc, char** argv) {
         
         
         //Aqui las hormigas recorren el grafo
-        for(int h = 0 ; h < 2 ; h++){
+        for(int h = 0 ; h < 20 ; h++){
             Hormiga& hormiga = hormigas[h];
            
             hormiga.iniciarSolu(volMax,pesoMax,productosCargar);
@@ -121,9 +125,12 @@ int main(int argc, char** argv) {
             //Se construye la solu
             solActual=construirSolu(grafo,productosCargar,hormiga,alpha,beta,tasaEva,vehiculo); 
             
-            if(solActual.getEsValida())
+            if(solActual.getEsValida()){ 
+                solActual.calcularFitness(vehiculo,coefV,coefVa,coefEsta);
                 soluciones.push_back(solActual);
             }
+               
+        }
         
         mejorSolIter = mejorSolucion(soluciones);
         
@@ -136,15 +143,11 @@ int main(int argc, char** argv) {
         
         numIter++;
     }
-//        cout<<"FINAL:---------------------------------------"<<endl;
-//    
-//        mejorSol.imprimirProductosCargados();
-//
-//        cout<<"Peso Cargado: "<< mejorSol.getPesoTotalCargado()<<endl;
-//        cout<<"Peso Restante: "<< mejorSol.getPesoRestante()<<endl<<endl;
-//
-//        cout<<"Volumen Cargado: "<< mejorSol.getVolumenTotalCargado()<<endl;
-//        cout<<"Volumen Restante: "<< mejorSol.getEspacioRestante()<<endl<<endl;
+        cout<<"FINAL:---------------------------------------"<<endl;
+    
+        mejorSol.imprimirProductosCargados();
 
+        mejorSol.imprimirSolu();
+     
     
 }
