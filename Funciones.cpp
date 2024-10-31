@@ -196,7 +196,7 @@ Vehiculo SeleccionarVehiculo(Pedido ped, vector<Vehiculo> lista){
 Solucion mejorSolucion(vector<Solucion> soluciones){
     
     Solucion mejorSol;
-    mejorSol.setFitness(-10000000);
+    mejorSol.setFitness(-100000);
     
     for(Solucion sol: soluciones){
         if(sol.getFitness()> mejorSol.getFitness())
@@ -295,7 +295,7 @@ Solucion construirSolu(Grafo& grafo, vector<Producto>& productos, Hormiga& hormi
     
     //  soluFinal.imprimirEspaciosSolucion();
 
-        soluFinal.imprimirProductosCargados();
+//        soluFinal.imprimirProductosCargados();
     }
     
     return hormiga.obtenerSolucion();
@@ -372,8 +372,6 @@ void imprimirEspaciosSolucion(map<Coordenada, Espacio>& espaciosSolucion)  {
         cout << "----------------------------------\n";
     }
 }
-
-
 
 
 Arista* calcularYSeleccionarArista(const vector<Arista*>& aristasDisponibles, map<Coordenada, Espacio>& espacios, vector<Producto>& productos, double alpha, double beta) {

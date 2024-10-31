@@ -30,7 +30,7 @@ void Colonia::inicializarColonia(Grafo& grafo) {
         }
         hormigas.push_back(nuevaHormiga);
     }
-    cout << "Colonia inicializada con " << numeroHormigas << " hormigas." << endl;
+//    cout << "Colonia inicializada con " << numeroHormigas << " hormigas." << endl;
 }
 
 // Actualiza las feromonas en las aristas
