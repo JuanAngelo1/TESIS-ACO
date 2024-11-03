@@ -86,7 +86,7 @@ vector<Producto> obtenerProductosBase(){
     productosBase.push_back(aspiradora_4);
     
     //Hornos
-    Producto horno_1(601, "Horno Eléctrico Modelo 1", 20.1, 0.78, 0.54, 0.54, 10);
+    Producto horno_1(601, "Horno Eléctrico Modelo 1", 9.1, 0.78, 0.54, 0.54, 8);
     Producto horno_2(602, "Horno Eléctrico Modelo 2", 7.10, 0.43, 0.51, 0.41, 6);
     Producto horno_3(603, "Horno Eléctrico Modelo 3", 7.25, 0.43, 0.52, 0.38, 6);
     Producto horno_4(604, "Horno Eléctrico Modelo 4", 7.50, 0.42, 0.42, 0.36, 6);
@@ -230,7 +230,7 @@ Solucion construirSolu(Grafo& grafo, vector<Producto>& productos, Hormiga& hormi
         vector<Arista*> aristasFiltradas = filtrarAristas(aristasDisponibles, productos, hormiga.obtenerSolucion());
         
         if (aristasFiltradas.empty()) {
-            cout << "No hay aristas disponibles para productos no cargados. Terminando." << endl;
+//            cout << "No hay aristas disponibles para productos no cargados. Terminando." << endl;
             break;
         }
 

@@ -15,6 +15,7 @@
 #include <map>
 #include <unordered_set>
 #include <math.h>
+#include <cmath>
 #include "Nodo.h"
 #include "Arista.h"
 #include "Producto.h"
@@ -66,55 +67,112 @@ public:
         aristasUsadas.push_back(arista);
     }
     
-    void calcularFitness(Vehiculo& vehiculo,double coefV, double coefVa, double coefEsta){
-        double fitness=0;
-        double volumenVehiculo= volumenTotalCargado+volRestante;
-        
-        double factorVolumen = (volumenTotalCargado / volumenVehiculo) * coefV;
-        double factorEspacioVacio = (volRestante) * coefVa;
+    void calcularFitness(Vehiculo& vehiculo, double coefEsta, double coefApilamiento, double coefProximidad, double coefAccesibilidad) {
+        double fitness = 0;
+
+        // Desbalance de peso
         double factorDesbalancePeso = calcularDesbalancePeso(vehiculo) * coefEsta;
 
-        // Fitness basado en la fórmula que proporcionaste
-        fitness = factorVolumen - factorEspacioVacio - factorDesbalancePeso;
+        // Bonus por apilamiento
+        double factorBonusApilamiento = calcularBonusApilamiento() * coefApilamiento;
 
-        // Asignamos el valor del fitness a la solución actual
+        // Factor de proximidad: premiar si el promedio de distancia es bajo
+        double factorProx=calcularFactorProximidad();
+        
+        double factorProximidad = (factorProx > 0) ? (1.0 / factorProx) * coefProximidad : 0.0;
+
+        // Penalización por accesibilidad para el orden de entrega
+//        double penalizacionAccesibilidad = calcularPenalizacionPorAccesibilidad(vehiculo) * coefAccesibilidad;
+        
+        double penalizacionAccesibilidad=0;
+        
+        // Cálculo final del fitness
+        fitness = -factorDesbalancePeso + factorBonusApilamiento + factorProximidad - penalizacionAccesibilidad;
+
+        // Asignar el fitness a la solución actual
         setFitness(fitness);
+        
+        cout<<"Factores Debugg:"<<endl;
+        cout<<"Factor Desbalance: "<<factorDesbalancePeso<<endl;
+        cout<<"Factor Bonus Apilamiento: "<<factorBonusApilamiento<<endl;
+        cout<<"Factor factorProximidad: "<<factorProximidad<<endl;
+
     }
     
-    double calcularDesbalancePeso(const Vehiculo& vehiculo) {
-        double pesoFrontal = 0.0;
-        double pesoTrasero = 0.0;
+    double calcularFactorProximidad() {
+        double sumaDistancias = 0.0;
+        int count = 0;
 
-        // Definimos una coordenada límite que separe la parte frontal de la trasera
-        double limiteFrontal = vehiculo.getAncho() / 2.0;
+        // Iterar sobre cada par de espacios en espaciosSolucion
+        for (map<Coordenada, Espacio>::iterator it1 = espaciosSolucion.begin(); it1 != espaciosSolucion.end(); ++it1) {
+            map<Coordenada, Espacio>::iterator it2 = it1;
+            ++it2; // Empezamos it2 en la siguiente posición después de it1
+            for (; it2 != espaciosSolucion.end(); ++it2) {
+                const Coordenada& coord1 = it1->first;
+                const Coordenada& coord2 = it2->first;
 
-        for (pair<const Coordenada, Espacio>& espacioPar : espaciosSolucion) {
-            const Coordenada& coord = espacioPar.first;
-            const Espacio& espacio = espacioPar.second;
-
-            // Sumamos el peso de los productos en este espacio
-            double pesoEnEspacio = 0.0;
-
-            // Crear una copia de la pila de productos para iterar sobre ella
-            stack<Producto*> copiaPila = espacio.getPilaDeProductos();
-            while (!copiaPila.empty()) {
-                Producto* producto = copiaPila.top(); // Obtener el producto en la cima
-                pesoEnEspacio += producto->getPeso();  // Acumular el peso
-                copiaPila.pop();  // Eliminar el producto de la copia
-            }
-
-            // Clasificamos el espacio como frontal o trasero según su posición
-            if (coord.y < limiteFrontal) {
-                pesoFrontal += pesoEnEspacio;
-            } else {
-                pesoTrasero += pesoEnEspacio;
+                // Calcular la distancia euclidiana entre coord1 y coord2
+                double distancia = sqrt(pow(coord1.x - coord2.x, 2) + pow(coord1.y - coord2.y, 2));
+                sumaDistancias += distancia;
+                count++;
             }
         }
 
-        // Calculamos el desbalance como la diferencia absoluta
-        return abs(pesoFrontal - pesoTrasero);
+        // Si hay al menos un par, devolver la distancia promedio; de lo contrario, devolver 0.0
+        return (count > 0) ? sumaDistancias / count : 0.0;
     }
+
+
+    double calcularBonusApilamiento() {
+        double bonusApilamiento = 0.0;
+        for (pair<const Coordenada, Espacio>& parEspacio : espaciosSolucion) {
+            const Espacio& espacio = parEspacio.second;
+            int cant=espacio.getPilaDeProductos().size();
+            if (cant > 1) {  // Si hay más de un producto en el espacio, es apilado
+                bonusApilamiento += 0.1 * (cant - 1); // Suma un bonus por cada producto adicional en el apilamiento
+            }
+        }
+        return bonusApilamiento;
+    }
+
+
     
+double calcularDesbalancePeso(const Vehiculo& vehiculo) {
+    double pesoFrontal = 0.0;
+    double pesoTrasero = 0.0;
+
+    // Definimos un límite en el eje X para dividir la parte frontal de la trasera
+    double limiteFrontal = vehiculo.getLargo() / 2.0;
+
+    for (map<Coordenada, Espacio>::const_iterator it = espaciosSolucion.begin(); it != espaciosSolucion.end(); ++it) {
+        const Coordenada& coord = it->first;
+        const Espacio& espacio = it->second;
+
+        // Sumamos el peso de los productos en este espacio
+        double pesoEnEspacio = 0.0;
+        stack<Producto*> copiaPila = espacio.getPilaDeProductos();
+        
+        while (!copiaPila.empty()) {
+            Producto* producto = copiaPila.top();
+            pesoEnEspacio += producto->getPeso();
+            copiaPila.pop();
+        }
+
+        // Usamos el eje X para clasificar el peso como frontal o trasero
+        if (coord.x < limiteFrontal) {
+            pesoFrontal += pesoEnEspacio;
+        } else {
+            pesoTrasero += pesoEnEspacio;
+        }
+    }
+
+    // Debugging para verificar los pesos en cada solución
+//    cout << "Debug - Peso Frontal: " << pesoFrontal << ", Peso Trasero: " << pesoTrasero << endl;
+
+    // Calculamos el desbalance como la diferencia absoluta
+    return abs(pesoFrontal - pesoTrasero);
+}
+
     bool esNodoValido(Nodo* nodo, Producto producto) {
         for (const Nodo* nodoOcupado : nodosOcupados) {
             if (nodo->posicionIgual(*nodoOcupado)) {

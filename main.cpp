@@ -33,13 +33,13 @@ int main(int argc, char** argv) {
     vector<Producto> productosBase = obtenerProductosBase();
     
     //Inicializar cantidades para pedido prueba
-    vector<int> cantidad = {1, 0, 0, 1,   // Refrigeradoras (cuatro)
-                            1, 1, 1,      // Lavadoras (tres modelos)
-                            1, 1, 0,      // Microondas (tres modelos)
-                            1, 0, 0, 0,   // Televisores (cuatro modelos)
-                            1, 0, 1, 0,   // Aspiradoras (cuatro modelos)
+    vector<int> cantidad = {1, 1, 0, 1,   // Refrigeradoras (cuatro)
+                            0, 0, 1,      // Lavadoras (tres modelos)
+                            0, 1, 0,      // Microondas (tres modelos)
+                            1, 1, 1, 1,   // Televisores (cuatro modelos)
+                            1, 1, 1, 1,   // Aspiradoras (cuatro modelos)
                             1, 0, 1, 0,   // Hornos eléctricos (cuatro modelos)
-                            1, 1, 1, 0,   // Cocinas (cinco modelos)
+                            1, 0, 1, 0,   // Cocinas (cinco modelos)
                             1, 1, 1};     // Licuadoras (tres modelos)
     
     //Productos a cargar generados
@@ -59,9 +59,7 @@ int main(int argc, char** argv) {
 //    vector<Pedido> listaPedidos;
 //    listaPedidos.push_back(pedido1);
  
-    double coefV=0.65;
-    double coefVa=0.10;
-    double coefEsta=0.25;
+    double coefV=0.65,coefVa=0.10;
     
     Vehiculo vehiculo=SeleccionarVehiculo(pedido1,listaVehiculos);
     double maxX = vehiculo.getLargo(); // Dimensión máxima X (largo)
@@ -75,18 +73,20 @@ int main(int argc, char** argv) {
     Solucion mejorSol;
     mejorSol.setFitness(-10000);
     
-    double alpha = 1.6, beta = 0.4;
+    double alpha = 1.6, beta = 0.3;
     double rho = 0.5; // Tasa de evaporación
     double Q = 100.0; // Constante para el depósito de feromonas
     
-    int iterMax = 30, tolerancia = 15;
+    double coefEsta=0.5;
+    double coefApilamiento=0.5 ,coefProximidad= 10,coefAccesibilidad=0;
+    int iterMax = 70, tolerancia = 40;
 
-    int numHormigas = 50;
+    int numHormigas = 60;
         
     Colonia colonia(numHormigas,iterMax,rho,alpha,beta);
     
     while(numIter < iterMax && sinMej < tolerancia){
-        cout << "Iteración: " << numIter + 1 << endl;
+//        cout << "Iteración: " << numIter + 1 << endl;
         
         Grafo grafo;
         cantNodos=grafo.generarNodosAleatorios(productosCargar, maxX, maxY, posxProducto);
@@ -116,8 +116,8 @@ int main(int argc, char** argv) {
             
             if(solActual.getEsValida()){ 
                 cantSoluciones++;
-                cout<<"Sol Encontrada #"<<cantSoluciones<<endl;
-                solActual.calcularFitness(vehiculo,coefV,coefVa,coefEsta);
+                cout<<"Solucion Encontrada #"<<cantSoluciones<<endl;
+                solActual.calcularFitness(vehiculo,coefEsta,coefApilamiento,coefProximidad,coefAccesibilidad);
                 soluciones.push_back(solActual);
             }  
         }
