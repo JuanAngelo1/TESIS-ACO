@@ -33,14 +33,14 @@ int main(int argc, char** argv) {
     vector<Producto> productosBase = obtenerProductosBase();
     
     //Inicializar cantidades para pedido prueba
-    vector<int> cantidad = {1, 0, 1, 1,   // Refrigeradoras (cuatro)
-                            1, 0, 1,      // Lavadoras (tres modelos)
+    vector<int> cantidad = {1, 0, 0, 1,   // Refrigeradoras (cuatro)
+                            1, 1, 1,      // Lavadoras (tres modelos)
                             1, 1, 0,      // Microondas (tres modelos)
                             1, 0, 0, 0,   // Televisores (cuatro modelos)
                             1, 0, 1, 0,   // Aspiradoras (cuatro modelos)
                             1, 0, 1, 0,   // Hornos eléctricos (cuatro modelos)
-                            1, 0, 1, 0,   // Cocinas (cinco modelos)
-                            0, 1, 1};     // Licuadoras (tres modelos)
+                            1, 1, 1, 0,   // Cocinas (cinco modelos)
+                            1, 1, 1};     // Licuadoras (tres modelos)
     
     //Productos a cargar generados
     vector<Producto> productosCargar = generarProductos(productosBase,cantidad);
@@ -58,40 +58,32 @@ int main(int argc, char** argv) {
     //En caso haya más pedidos se debera realizar bucle
 //    vector<Pedido> listaPedidos;
 //    listaPedidos.push_back(pedido1);
-    
-    //Parametros ACO
-    
-    int numHormigas = 50;
-    int iterMax = 20;
-    int tolerancia = 20;
-    double alpha = 1.0;
-    double beta = 2.0;
-    double tasaEva = 0.5; 
-    
+ 
     double coefV=0.65;
     double coefVa=0.10;
     double coefEsta=0.25;
     
-    Colonia colonia(numHormigas,iterMax,tasaEva,alpha,beta);
-    
     Vehiculo vehiculo=SeleccionarVehiculo(pedido1,listaVehiculos);
     double maxX = vehiculo.getLargo(); // Dimensión máxima X (largo)
     double maxY = vehiculo.getAncho(); // Dimensión máxima Y (ancho)
-    double maxZ = vehiculo.getAlto(); // Dimensión máxima Z (altura)
-    
     double pesoMax= vehiculo.getPesoMaximo();
     double volMax= vehiculo.getVolMaximo();
     
     int posxProducto=3;
-    int numIter=0;
-    int sinMej=0;
-    int cantNodos,numAristas,cantSoluciones=0;
+    int numIter=0, sinMej=0,cantSoluciones=0;
+    int cantNodos,numAristas;
     Solucion mejorSol;
     mejorSol.setFitness(-10000);
     
-    int cantProductos=obtenerCantidad(productosCargar);
+    double alpha = 1.6, beta = 0.4;
+    double rho = 0.5; // Tasa de evaporación
+    double Q = 100.0; // Constante para el depósito de feromonas
     
-    cout<<"Cantidad Productos a Cargar: "<<cantProductos<< endl;
+    int iterMax = 30, tolerancia = 15;
+
+    int numHormigas = 50;
+        
+    Colonia colonia(numHormigas,iterMax,rho,alpha,beta);
     
     while(numIter < iterMax && sinMej < tolerancia){
         cout << "Iteración: " << numIter + 1 << endl;
@@ -101,13 +93,10 @@ int main(int argc, char** argv) {
         numAristas=cantNodos*30;
         
         grafo.generarAristasAleatorias(numAristas,50);
-        
         grafo.conectarProductos(productosCargar.size(), posxProducto);
         
-        cout<<numAristas<<endl;
-        
-//       grafo.mostrarGrafo();
-  
+//        cout<<numAristas<<endl;
+      
         vector<Solucion> soluciones;
         Solucion mejorSolIter;
         
@@ -115,7 +104,6 @@ int main(int argc, char** argv) {
         colonia.inicializarColonia(grafo);
         vector<Hormiga> hormigas=colonia.getHormigas();
         Solucion solActual;
-
         
         //Aqui las hormigas recorren el grafo
         for(int h = 0 ; h < numHormigas ; h++){
@@ -124,13 +112,13 @@ int main(int argc, char** argv) {
             hormiga.iniciarSolu(volMax,pesoMax,productosCargar);
             
             //Se construye la solu
-            solActual=construirSolu(grafo,productosCargar,hormiga,alpha,beta,tasaEva,vehiculo); 
+            solActual=construirSolu(grafo,productosCargar,hormiga,alpha,beta,vehiculo); 
             
             if(solActual.getEsValida()){ 
-                cout<<"Sol Encontrada"<<endl;
+                cantSoluciones++;
+                cout<<"Sol Encontrada #"<<cantSoluciones<<endl;
                 solActual.calcularFitness(vehiculo,coefV,coefVa,coefEsta);
                 soluciones.push_back(solActual);
-                cantSoluciones++;
             }  
         }
         
@@ -141,10 +129,18 @@ int main(int argc, char** argv) {
             sinMej=0;
         }else
             sinMej++;
+         
+        // Actualiza las feromonas en el grafo usando la mejor solución
+        actualizarFeromonasOffline(mejorSolIter, grafo, rho, Q); // Usa la mejor solución directamente
         
-        
+        // Limpiar los datos innecesarios en cada solución después de actualizar feromonas
+        for (Solucion& sol : soluciones) {
+            sol.limpiarSolucion();
+        }
+    
         numIter++;
     }
+    
         cout<<"Cantidad de Soluciones Encontradas: "<<cantSoluciones<<endl;
         cout<<"FINAL:"<<endl;
         mejorSol.imprimirProductosCargados();

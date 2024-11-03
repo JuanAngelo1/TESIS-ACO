@@ -34,6 +34,10 @@ public:
         recorrido.push_back(nodoActual); // Añadir el nodo inicial al recorrido
        
     }
+    
+    void agregarAristaSolucion(Arista *arista){
+        solucionActual.agregarAristaUsada(arista);
+    }
 
     // Moverse al siguiente nodo
     bool moverAlSiguienteNodo(Nodo* nuevoNodo) {

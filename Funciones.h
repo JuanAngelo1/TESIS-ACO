@@ -40,7 +40,7 @@ vector<Producto> obtenerProductosBase();
 
 vector <Vehiculo> obtenerVehiculos();
 
-Solucion construirSolu(Grafo& , vector<Producto>& , Hormiga& , double , double , double , Vehiculo& );
+Solucion construirSolu(Grafo& , vector<Producto>& , Hormiga& , double , double , Vehiculo& );
 
 Arista* seleccionarArista(const vector<double>& , const vector<Arista*>& );
 
@@ -62,5 +62,7 @@ vector<Arista*> filtrarAristas(const vector<Arista*>& , const vector<Producto>& 
 void crearPrimerEspacio(Hormiga& ,map<Coordenada, Espacio>& , double ,vector<Producto>& );
 
 void imprimirEspaciosSolucion(map<Coordenada, Espacio>& );
+
+void actualizarFeromonasOffline(const Solucion& , Grafo& , double , double );
 
 #endif /* FUNCIONES_H */

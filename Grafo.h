@@ -169,8 +169,11 @@ public:
         }
     }
     
- 
+    vector<Arista*> getAristas()const {
+        return aristas;
+    } 
     
+ 
 };
 
 #endif /* GRAFO_H */

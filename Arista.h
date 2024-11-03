@@ -36,7 +36,7 @@ public:
     double getFeromona() const { return feromona; }
     double getCosto() const { return costo; }
 
-    void actualizarFeromona(double nuevaFeromona) {
+    void setFeromona(double nuevaFeromona) {
         feromona = nuevaFeromona;
     }
 
@@ -59,7 +59,7 @@ public:
     }
     
     double getHeuristica(Producto& productoDestino, const Coordenada& coordenadasNodoDestino, const map<Coordenada, Espacio>& espacios) const {
-        double heuristica = 1.0;
+        double heuristica = 1.0;  // Valor neutro inicial
         bool espacioEncontrado = false;
 
         // Verificar colisión con cada espacio en el mapa
@@ -77,22 +77,29 @@ public:
                 // Calcular espacio restante en el espacio destino
                 double espacioRestante = calcularEspacioRestante(productoDestino, espacioExistente);
 
-                // Calcular compatibilidad de apilamiento: ligeramente preferido si está vacío, y más preferido si es apilable
-                double compatibilidadApilamiento = espacioExistente.estaVacio() ? 0.6 : (espacioExistente.esApilable(&productoDestino) ? 0.8 : 0.5);
+                // Verificar compatibilidad de apilamiento
+                if (!espacioExistente.esApilable(&productoDestino)) {
+                    // Penalización fuerte si no se puede apilar en este espacio
+                    heuristica = 0.1;  // Valor bajo para penalizar fuertemente esta opción
+                } else {
+                    // Si es apilable, calculamos la heurística normalmente
+                    double compatibilidadApilamiento = espacioExistente.estaVacio() ? 0.6 : 0.8;
 
-                // Ajuste de heurística combinando los factores
-                heuristica = (ajusteVolumetrico * 0.5) + (espacioRestante * 0.3) + (compatibilidadApilamiento * 0.2);
+                    // Ajuste de heurística combinando los factores
+                    heuristica = (ajusteVolumetrico * 0.4) + (espacioRestante * 0.3) + (compatibilidadApilamiento * 0.3);
+                }
                 break;
             }
         }
 
-        // En caso de no encontrar espacio apilable o colisionable, dar una heurística neutra en lugar de penalizar
+        // En caso de no encontrar espacio apilable o colisionable, dar una heurística neutra
         if (!espacioEncontrado) {
-            heuristica = 1.0;  // Neutro, en lugar de penalización fuerte
+            heuristica = 1.0;  // Valor neutro en caso de no encontrar colisión o apilamiento
         }
 
         return heuristica;
     }
+
     
     double calcularAjusteVolumetrico(const Producto& producto, const Espacio& espacio) const {
         // Volumen del producto

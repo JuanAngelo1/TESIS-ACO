@@ -206,7 +206,7 @@ Solucion mejorSolucion(vector<Solucion> soluciones){
     return mejorSol;
 }
 
-Solucion construirSolu(Grafo& grafo, vector<Producto>& productos, Hormiga& hormiga, double alpha, double beta, double tasaEva, Vehiculo& vehiculo) {
+Solucion construirSolu(Grafo& grafo, vector<Producto>& productos, Hormiga& hormiga, double alpha, double beta, Vehiculo& vehiculo) {
     
     // Mapa de coordenadas a espacios ocupados durante esta construcción de solución.
     map<Coordenada, Espacio> espacios;  
@@ -217,7 +217,7 @@ Solucion construirSolu(Grafo& grafo, vector<Producto>& productos, Hormiga& hormi
     crearPrimerEspacio(hormiga,espacios,vehiculo.getAlto(),productos);
     
     int i = 0;
-    int iterSinAvance = 0, maxIterSinAvance = 20;
+    int iterSinAvance = 0, maxIterSinAvance = 10;
     bool soluEncontrada=false;
     
     // Recorre el grafo construyendo una solución
@@ -243,7 +243,9 @@ Solucion construirSolu(Grafo& grafo, vector<Producto>& productos, Hormiga& hormi
             cout << "No se pudo seleccionar una arista válida, terminando." << endl;
             break;
         }
-
+        
+        hormiga.agregarAristaSolucion(aristaSeleccionada);
+        
         // Obtener el nodo destino de la arista seleccionada
         Nodo* nodoSiguiente = aristaSeleccionada->getNodoFinal();
 
@@ -290,8 +292,7 @@ Solucion construirSolu(Grafo& grafo, vector<Producto>& productos, Hormiga& hormi
         
     if(soluEncontrada){
         hormiga.setEspaciosSolucion(espacios);
-    
-        Solucion soluFinal= hormiga.obtenerSolucion();
+//        Solucion soluFinal= hormiga.obtenerSolucion();
     
     //  soluFinal.imprimirEspaciosSolucion();
 
@@ -300,7 +301,6 @@ Solucion construirSolu(Grafo& grafo, vector<Producto>& productos, Hormiga& hormi
     
     return hormiga.obtenerSolucion();
 }
-
 
 void crearPrimerEspacio(Hormiga& hormiga,map<Coordenada, Espacio>& espacios, double alturaVehiculo,vector<Producto>& productos){
     
@@ -342,7 +342,6 @@ void crearNuevoEspacio(const Coordenada& coordenadas, map<Coordenada, Espacio>& 
 
 void imprimirEspaciosSolucion(map<Coordenada, Espacio>& espaciosSolucion)  {
     
-    
     for (const pair<const Coordenada, Espacio>& par : espaciosSolucion) {
         const Coordenada& coord = par.first;
         const Espacio& espacio = par.second;
@@ -372,7 +371,6 @@ void imprimirEspaciosSolucion(map<Coordenada, Espacio>& espaciosSolucion)  {
         cout << "----------------------------------\n";
     }
 }
-
 
 Arista* calcularYSeleccionarArista(const vector<Arista*>& aristasDisponibles, map<Coordenada, Espacio>& espacios, vector<Producto>& productos, double alpha, double beta) {
     vector<double> probabilidades;
@@ -417,8 +415,6 @@ vector<Arista*> filtrarAristas(const vector<Arista*>& aristasDisponibles, const 
 
     return aristasFiltradas;
 }
-
-
 
 Arista* seleccionarArista(const vector<double>& probabilidades, const vector<Arista*>& aristasDisponibles) {
     // Generar un número aleatorio entre 0 y 1
@@ -471,8 +467,26 @@ ResultadoEspacio buscarEspacioDisponible(const Coordenada& coordenadasNodo, map<
     return NO_HAY_COLISION;  // No se encontró colisión con ningún espacio existente
 }
 
+void actualizarFeromonasOffline(const Solucion& mejorSol, Grafo& grafo, double rho, double Q) {
+    
+    // Calcula el incremento de feromona basado en el fitness de la mejor solución
+    double incrementoFeromona = Q / mejorSol.getFitness();
 
+    // Recorre todas las aristas del grafo
+    for (Arista* arista : grafo.getAristas()) {
+        double feromonaActual = arista->getFeromona();
 
+        // Verifica si la arista forma parte de la mejor solución
+        if (mejorSol.contieneArista(arista)) {
+            // Refuerza la feromona en la arista de la mejor solución
+            arista->setFeromona((1 - rho) * feromonaActual + rho * incrementoFeromona);
+            
+        } else {
+            //Se evapora las feromonas de las demás aristas
+            arista->setFeromona((1 - rho) * feromonaActual);
+        }
+    }
+}
 
 
 

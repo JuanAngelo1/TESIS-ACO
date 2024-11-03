@@ -16,6 +16,7 @@
 #include <unordered_set>
 #include <math.h>
 #include "Nodo.h"
+#include "Arista.h"
 #include "Producto.h"
 #include "Espacio.h"
 #include "Coordenada.h"
@@ -27,7 +28,8 @@ class Solucion{
     
 private:
     
-    vector<Nodo*> nodosOcupados;  
+    vector<Nodo*> nodosOcupados; 
+    vector<Arista*> aristasUsadas;
     vector<int> idsProductosCargados;  // Solo los IDs de los productos cargados
     map<Coordenada, Espacio> espaciosSolucion;  
     double pesoTotalCargado;      
@@ -43,6 +45,26 @@ public:
 
     Solucion(double volumenDisponible, double pesoDisponible) 
         : volRestante(volumenDisponible),pesoRestante(pesoDisponible), pesoTotalCargado(0), volumenTotalCargado(0), fitness(0), esValida(true) {}
+    
+    
+    void limpiarSolucion() {
+        nodosOcupados.clear();
+        aristasUsadas.clear();
+        
+        // Opcionalmente podrías liberar memoria de los vectores si es crítico
+        nodosOcupados.shrink_to_fit();
+        aristasUsadas.shrink_to_fit();
+        idsProductosCargados.shrink_to_fit();
+    }
+
+    
+    bool contieneArista(Arista* arista) const {
+        return find(aristasUsadas.begin(), aristasUsadas.end(), arista) != aristasUsadas.end();
+    }
+    
+    void agregarAristaUsada(Arista* arista) {
+        aristasUsadas.push_back(arista);
+    }
     
     void calcularFitness(Vehiculo& vehiculo,double coefV, double coefVa, double coefEsta){
         double fitness=0;
@@ -192,9 +214,7 @@ public:
         
         cout<<"Fitness Solución: "<< fitness <<endl;
     }
-    
-    
-#include <iostream>
+   
 
 void imprimirEspaciosSolucion() const {
     
@@ -229,8 +249,6 @@ void imprimirEspaciosSolucion() const {
     }
 }
 
-
-
     // Getters para obtener información de la solución
     double getPesoTotalCargado() const { return pesoTotalCargado; }
     double getVolumenTotalCargado() const { return volumenTotalCargado; }
@@ -240,7 +258,9 @@ void imprimirEspaciosSolucion() const {
     bool getEsValida() const {return esValida;}
     vector<Nodo*> getNodosOcupados() const { return nodosOcupados; }
     vector<int> getidsProducto()const {return idsProductosCargados;}
-    
+    const vector<Arista*>& getAristasUsadas() const {
+        return aristasUsadas;
+    }
         // Setters
     void setPesoTotalCargado(double peso) {
         pesoTotalCargado = peso;
