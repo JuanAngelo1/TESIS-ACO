@@ -29,7 +29,7 @@ private:
         
     // Lista de espacios generados en el vehículo
     vector<Espacio> espaciosDisponibles; 
- 
+    
 public:
     
     // Constructor

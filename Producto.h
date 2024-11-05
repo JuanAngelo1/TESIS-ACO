@@ -11,6 +11,7 @@
 
 #include <fstream>
 #include <vector>
+#include "Coordenada.h"
 
 using namespace std;
 
@@ -22,11 +23,15 @@ private:
     double largo,ancho,alto;             
     double limitePeso;   
     double volumen;
-
+    
+    double latitudDestino;
+    double longitudDestino;
+    int ordenColocacion; 
 public:
     
-        // Constructor
-    Producto(int id, string n, double p, double l, double a, double al, double lp);
+    // Constructor
+    Producto(int id, string n, double peso, double largo, double ancho, double alto, 
+            double limitePeso,double latitud, double longitud);
     
     Producto();
 
@@ -38,7 +43,8 @@ public:
     void setAncho(double a);
     void setAlto(double al);
     void setLimitePeso(double lp);
-    void setPuedeRotar(vector<int> pr);
+    void setDestino(double lon,double lat);
+    void setOrdenColocacion(int i);
     
     // Getters
     int getIdProducto() const;
@@ -49,13 +55,16 @@ public:
     double getAltura() const;
     double getLimitePeso() const;
     double getVolumen()const;
+    double getLatitud()const;
+    double getLongitud()const;
+    int getOrden()const;
+
 
 
     // Mostrar información del tipo de producto
     void mostrarInformacion() const;
     
     bool esValido() const ;
-    
     
     bool esApilableSobre(Producto* nuevoProducto) const;
 

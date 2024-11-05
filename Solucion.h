@@ -67,6 +67,49 @@ public:
         aristasUsadas.push_back(arista);
     }
     
+    double calcularDistanciaEuclidiana(double x1, double y1, double x2, double y2) {
+        return sqrt(pow(x2 - x1, 2) + pow(y2 - y1, 2));
+    }
+    
+    double calcularPenalizacionProximidadPuerta(double largoVehiculo, double anchoVehiculo) {
+        // Coordenada de la puerta trasera del vehículo, en el lado derecho (x = largoVehiculo)
+        Coordenada puerta(largoVehiculo, anchoVehiculo / 2.0);
+        double penalizacionTotal = 0.0;
+
+        for (pair<const Coordenada, Espacio>& par : espaciosSolucion) {
+            const Coordenada& posicionProducto = par.first;
+            const Espacio& espacio = par.second;
+
+            // Si el espacio tiene productos, iteramos sobre ellos para calcular la penalización
+            if (!espacio.estaVacio()) {
+                stack<Producto*> productos = espacio.getPilaDeProductos();
+
+                // Crear una copia de la pila de productos para no perder datos
+                stack<Producto*> copiaPila = productos;
+
+                while (!copiaPila.empty()) {
+                    Producto* producto = copiaPila.top();
+                    int ordenEntrega = producto->getOrden();  // Obtener el orden de entrega del producto
+
+                    // Calcular la distancia euclidiana a la puerta trasera
+                    double distancia = calcularDistanciaEuclidiana(
+                        puerta.x, puerta.y,
+                        posicionProducto.x, posicionProducto.y
+                    );
+
+                    // Penalización proporcional al orden de entrega: penaliza más si el orden es menor y el producto está lejos de la puerta
+                    penalizacionTotal += distancia * (1.0 / ordenEntrega);
+
+                    copiaPila.pop();  // Eliminar el producto de la copia
+                }
+            }
+        }
+
+        return penalizacionTotal;
+    }
+
+
+    
     void calcularFitness(Vehiculo& vehiculo, double coefEsta, double coefApilamiento, double coefProximidad, double coefAccesibilidad) {
         double fitness = 0;
 
@@ -82,20 +125,19 @@ public:
         double factorProximidad = (factorProx > 0) ? (1.0 / factorProx) * coefProximidad : 0.0;
 
         // Penalización por accesibilidad para el orden de entrega
-//        double penalizacionAccesibilidad = calcularPenalizacionPorAccesibilidad(vehiculo) * coefAccesibilidad;
-        
-        double penalizacionAccesibilidad=0;
+        double penalizacionAccesibilidad = calcularPenalizacionProximidadPuerta(vehiculo.getLargo(),vehiculo.getAncho()) * coefAccesibilidad;
         
         // Cálculo final del fitness
-        fitness = -factorDesbalancePeso + factorBonusApilamiento + factorProximidad - penalizacionAccesibilidad;
+        fitness = factorBonusApilamiento + factorProximidad - penalizacionAccesibilidad - factorDesbalancePeso;
 
         // Asignar el fitness a la solución actual
         setFitness(fitness);
         
-        cout<<"Factores Debugg:"<<endl;
-        cout<<"Factor Desbalance: "<<factorDesbalancePeso<<endl;
-        cout<<"Factor Bonus Apilamiento: "<<factorBonusApilamiento<<endl;
-        cout<<"Factor factorProximidad: "<<factorProximidad<<endl;
+        cout<<"Bonus Apilamiento: "<<factorBonusApilamiento<<endl;
+        cout<<"Bonus Proximidad: "<<factorProximidad<<endl;
+        cout<<"Penalización Accesibilidad: " << penalizacionAccesibilidad << endl;
+        cout<<"Penalizacion Desbalance: "<<factorDesbalancePeso<<endl;
+        cout<<"Fitness: "<<fitness<<endl;
 
     }
     

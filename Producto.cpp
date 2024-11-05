@@ -6,6 +6,7 @@
  */
 
 #include "Producto.h"
+#include "Coordenada.h"
 #include <iostream>
 #include <iomanip>
 #include <cstring>
@@ -16,7 +17,7 @@
 using namespace std;
 
 //luego añadir puedeRotar
-Producto::Producto(int id, string n, double p, double l, double a, double al, double lp){
+Producto::Producto(int id, string n, double p, double l, double a, double al, double lp,double lat,double lon){
     id_producto=id;
     nombre=n;
     peso=p;
@@ -25,6 +26,9 @@ Producto::Producto(int id, string n, double p, double l, double a, double al, do
     alto=al;
     limitePeso=lp;
     volumen=l*a*al;
+    latitudDestino=lat;
+    longitudDestino=lon;
+    ordenColocacion=1;
 }
 
 Producto::Producto() : id_producto(0), nombre(""), peso(0.0), largo(0.0), ancho(0.0), alto(0.0), limitePeso(0.0), volumen(0.0) {
@@ -40,6 +44,9 @@ Producto::Producto() : id_producto(0), nombre(""), peso(0.0), largo(0.0), ancho(
     double Producto::getAltura() const { return alto; }
     double Producto::getLimitePeso() const { return limitePeso; }
     double Producto::getVolumen()const {return volumen;}
+    double Producto::getLatitud()const {return latitudDestino;}
+    double Producto::getLongitud()const{return longitudDestino;}
+    int Producto::getOrden()const{return ordenColocacion;}
 
     // Setters
     void Producto::setIdProducto(int id) { id_producto = id; }
@@ -49,6 +56,13 @@ Producto::Producto() : id_producto(0), nombre(""), peso(0.0), largo(0.0), ancho(
     void Producto::setAncho(double a) { ancho = a; }
     void Producto::setAlto(double al) { alto = al; }
     void Producto::setLimitePeso(double lp) { limitePeso = lp; }
+    void Producto::setOrdenColocacion(int i){ordenColocacion=i;}
+    
+    
+    void Producto::setDestino(double lon,double lat){
+        latitudDestino=lon;
+        latitudDestino=lat;
+    };
 
     // Mostrar información del tipo de producto
     void Producto::mostrarInformacion() const {

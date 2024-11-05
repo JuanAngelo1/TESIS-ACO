@@ -45,6 +45,7 @@ OBJECTFILES= \
 	${OBJECTDIR}/Nodo.o \
 	${OBJECTDIR}/Pedido.o \
 	${OBJECTDIR}/Producto.o \
+	${OBJECTDIR}/Rutas.o \
 	${OBJECTDIR}/Solucion.o \
 	${OBJECTDIR}/TipoProducto.o \
 	${OBJECTDIR}/Vehiculo.o \
@@ -124,6 +125,11 @@ ${OBJECTDIR}/Producto.o: Producto.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
 	$(COMPILE.cc) -O2 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/Producto.o Producto.cpp
+
+${OBJECTDIR}/Rutas.o: Rutas.cpp
+	${MKDIR} -p ${OBJECTDIR}
+	${RM} "$@.d"
+	$(COMPILE.cc) -O2 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/Rutas.o Rutas.cpp
 
 ${OBJECTDIR}/Solucion.o: Solucion.cpp
 	${MKDIR} -p ${OBJECTDIR}

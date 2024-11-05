@@ -21,6 +21,8 @@
 #include "Nodo.h"
 #include "Espacio.h"
 #include "Funciones.h"
+#include "Coordenada.h"
+#include "Rutas.h"
 
 using namespace std;
 
@@ -48,13 +50,6 @@ int main(int argc, char** argv) {
     //Inicializar Pedidos
     Pedido pedido1(1, productosCargar, 8, "alta");
     
-    //Prueba productos a cargar
-    
-//    for(int i=0; i<productosCargar.size();i++){
-//        productosCargar[i].mostrarInformacion();
-//        cout<<endl;
-//    }
-
     //En caso haya más pedidos se debera realizar bucle
 //    vector<Pedido> listaPedidos;
 //    listaPedidos.push_back(pedido1);
@@ -77,17 +72,26 @@ int main(int argc, char** argv) {
     double rho = 0.5; // Tasa de evaporación
     double Q = 100.0; // Constante para el depósito de feromonas
     
-    double coefEsta=0.5;
-    double coefApilamiento=0.5 ,coefProximidad= 10,coefAccesibilidad=0;
+    double coefEsta=0.01,coefApilamiento=10 ,coefProximidad= 10,coefAccesibilidad=0.9; 
     int iterMax = 70, tolerancia = 40;
-
+    
     int numHormigas = 60;
         
     Colonia colonia(numHormigas,iterMax,rho,alpha,beta);
     
+    //Coordenadas Tienda
+    Coordenada tiendaOrigen = Coordenada(-12.077275894793303, -77.09255117444374);
+    
+    optimizarRuta(productosCargar,tiendaOrigen.x,tiendaOrigen.y);
+    
+//    for(int i=0; i<productosCargar.size();i++){
+//        cout<<productosCargar[i].getNombre()<<"-"<<productosCargar[i].getOrden()<<endl;
+//    }
+    
+    
     while(numIter < iterMax && sinMej < tolerancia){
 //        cout << "Iteración: " << numIter + 1 << endl;
-        
+    
         Grafo grafo;
         cantNodos=grafo.generarNodosAleatorios(productosCargar, maxX, maxY, posxProducto);
         numAristas=cantNodos*30;
@@ -116,7 +120,7 @@ int main(int argc, char** argv) {
             
             if(solActual.getEsValida()){ 
                 cantSoluciones++;
-                cout<<"Solucion Encontrada #"<<cantSoluciones<<endl;
+                cout<<"Solucion #"<<cantSoluciones<<endl;
                 solActual.calcularFitness(vehiculo,coefEsta,coefApilamiento,coefProximidad,coefAccesibilidad);
                 soluciones.push_back(solActual);
             }  
@@ -140,9 +144,9 @@ int main(int argc, char** argv) {
     
         numIter++;
     }
-    
+        cout<<endl;
         cout<<"Cantidad de Soluciones Encontradas: "<<cantSoluciones<<endl;
-        cout<<"FINAL:"<<endl;
+        cout<<"Mejor Solución:"<<endl;
         mejorSol.imprimirProductosCargados();
         mejorSol.imprimirSolu();
         mejorSol.imprimirEspaciosSolucion();

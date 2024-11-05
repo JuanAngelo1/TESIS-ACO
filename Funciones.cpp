@@ -30,94 +30,48 @@ int obtenerCantidad(vector<Producto> productos){
     return i;
 }
 
-vector<Producto> obtenerProductosBase(){
-    
-    vector <Producto> productosBase;
-    
-    //Lavadoras
-    Producto refri_1(101, "Refrigeradora LG Top Freezer GT57BPSX", 85.5, 0.96, 0.80, 1.76, 40.0);
-    Producto refri_2(102, "Refrigeradora Samsung Side By Side RS52B3000M9", 93.0, 0.72, 0.97, 1.89, 50.0);
-    Producto refri_3(103, "Refrigeradora MABE Side by Side No Frost Inverter", 94.0, 0.77, 0.92, 1.92, 50.0);
-    Producto refri_4(104, "Refrigeradora LG Top Freezer VT37BPM", 70, 0.72, 0.73, 1.79, 40.0);
-    
-    productosBase.push_back(refri_1);
-    productosBase.push_back(refri_2);
-    productosBase.push_back(refri_3);
-    productosBase.push_back(refri_4);
+vector<Producto> obtenerProductosBase() {
+    vector<Producto> productosBase;
 
-    //Lavadoras
-    Producto lavadora_1(201, "Lavadora Samsung Bubble Smart WA19CG6886BVPE", 51, 0.74, 0.70, 1.17, 34.0);
-    Producto lavadora_2(201, "Lavadora Mabe LMA8120WDGBB0", 47, 0.67, 0.66, 1.05, 35.0);
-    Producto lavadora_3(201, "Lavaseca LG WD9PVC4S6 AI DD", 66, 0.58, 0.66, 0.89, 40.0);
-    
-    productosBase.push_back(lavadora_1);
-    productosBase.push_back(lavadora_2);
-    productosBase.push_back(lavadora_3);
-    
-    //Microondas
-    Producto microondas_1(301, "Horno Microonda Panasonic NN-GT34JBRPK", 15.4, 0.55, 0.34, 0.42, 10);
-    Producto microondas_2(302, "Horno Microondas Indurama MWI-20TCRP", 11.23, 0.48, 0.38, 0.29, 10);
-    Producto microondas_3(303, "Horno Microondas LG MS2536GIS", 11.0, 0.54, 0.417, 0.294, 10);
-    
-    productosBase.push_back(microondas_1);
-    productosBase.push_back(microondas_2);
-    productosBase.push_back(microondas_3);
-    
-    //TV  
-    Producto tv_1(401, "Televisor TCL SMART TV 65 QLED 4K UHD", 17.3, 0.30, 1.44, 0.83 , 0.0);
-    Producto tv_2(402, "Televisor Samsung Smart TV 50 LED 4K UHD", 9.5, 0.25, 1.12, 0.69, 0.0);
-    Producto tv_3(403, "Televisor LG Smart TV 55 Nanocell 4K UHD", 14.1, 0.23, 1.23, 0.78, 0.0);
-    Producto tv_4(404, "Televisor Philips 50 4K Ultra HD Google TV", 9.31, 0.25, 1.11, 0.71, 0.0);
-    
-    productosBase.push_back(tv_1);
-    productosBase.push_back(tv_2);
-    productosBase.push_back(tv_3);
-    productosBase.push_back(tv_4);
-    
-    //Aspiradoras
-    Producto aspiradora_1(501, "Aspiradora Bosch Serie 4", 8.3, 0.58, 0.36, 0.31, 0);
-    Producto aspiradora_2(502, "Aspiradora Electrolux ERG36", 4.21, 0.15, 0.30, 0.69, 0);
-    Producto aspiradora_3(503, "Aspiradora Thomas TH-1870", 5.2 , 0.33, 0.28, 0.28, 0);
-    Producto aspiradora_4(504, "Aspiradora Electrolux PTE10", 2.3, 0.27, 0.31, 1.28, 0);
-    
-    productosBase.push_back(aspiradora_1);
-    productosBase.push_back(aspiradora_2);
-    productosBase.push_back(aspiradora_3);
-    productosBase.push_back(aspiradora_4);
-    
-    //Hornos
-    Producto horno_1(601, "Horno Eléctrico Modelo 1", 9.1, 0.78, 0.54, 0.54, 8);
-    Producto horno_2(602, "Horno Eléctrico Modelo 2", 7.10, 0.43, 0.51, 0.41, 6);
-    Producto horno_3(603, "Horno Eléctrico Modelo 3", 7.25, 0.43, 0.52, 0.38, 6);
-    Producto horno_4(604, "Horno Eléctrico Modelo 4", 7.50, 0.42, 0.42, 0.36, 6);
-    
-    productosBase.push_back(horno_1);
-    productosBase.push_back(horno_2);
-    productosBase.push_back(horno_3);
-    productosBase.push_back(horno_4);
-    
-    //Cocinas
-    Producto cocina_1(701, "Cocina Klimatic Munchen", 26.6, 0.552, 0.495, 0.85, 15);
-    Producto cocina_2(702, "Cocina MABE EMP5120GP1", 24.5, 0.540, 0.52, 0.915, 15);
-    Producto cocina_3(703, "Cocina Indurama Parma Zafiro", 45.82, 0.636, 0.76, 0.95, 20);
-    Producto cocina_4(704, "Cocina MABE CMP5140FX0", 28.3, 0.540, 0.52, 0.925, 15);
+    // Productos con coordenadas de destino ya asignadas
+    productosBase.push_back(Producto(101, "Refrigeradora LG Top Freezer GT57BPSX", 85.5, 0.96, 0.80, 1.76, 40.0, -12.079270, -77.063227)); // Pueblo Libre
+    productosBase.push_back(Producto(102, "Refrigeradora Samsung Side By Side RS52B3000M9", 93.0, 0.72, 0.97, 1.89, 50.0, -12.122452, -77.031293)); // Miraflores
+    productosBase.push_back(Producto(103, "Refrigeradora MABE Side by Side No Frost Inverter", 94.0, 0.77, 0.92, 1.92, 50.0, -12.097622, -77.036002)); // San Isidro
+    productosBase.push_back(Producto(104, "Refrigeradora LG Top Freezer VT37BPM", 70, 0.72, 0.73, 1.79, 40.0, -12.085846, -76.971214)); // La Molina
 
-    productosBase.push_back(cocina_1);
-    productosBase.push_back(cocina_2);
-    productosBase.push_back(cocina_3);
-    productosBase.push_back(cocina_4);
-    
-    //Licuadoras
-    Producto licuadora_1(801, "Licuadora Miray LIM-9", 1.3, 0.133, 0.22, 0.35, 0);
-    Producto licuadora_2(802, "Licuadora Oster 250-22", 3.74, 0.23, 0.19, 0.335, 0);
-    Producto licuadora_3(803, "Licuadora Thomas TH-780VR", 4.7, 0.22, 0.29, 0.38, 0);
-    
-    productosBase.push_back(licuadora_1);
-    productosBase.push_back(licuadora_2);
-    productosBase.push_back(licuadora_3);
-    
+    productosBase.push_back(Producto(201, "Lavadora Samsung Bubble Smart WA19CG6886BVPE", 51, 0.74, 0.70, 1.17, 34.0, -12.053728, -76.948494)); // Ate
+    productosBase.push_back(Producto(202, "Lavadora Mabe LMA8120WDGBB0", 47, 0.67, 0.66, 1.05, 35.0, -12.107380, -76.996883)); // San Borja
+    productosBase.push_back(Producto(203, "Lavaseca LG WD9PVC4S6 AI DD", 66, 0.58, 0.66, 0.89, 40.0, -12.134781, -77.014236)); // Surquillo
+
+    productosBase.push_back(Producto(301, "Horno Microonda Panasonic NN-GT34JBRPK", 15.4, 0.55, 0.34, 0.42, 10, -12.140356, -76.985933)); // Surco
+    productosBase.push_back(Producto(302, "Horno Microondas Indurama MWI-20TCRP", 11.23, 0.48, 0.38, 0.29, 10, -12.158560, -76.989342)); // San Juan de Miraflores
+    productosBase.push_back(Producto(303, "Horno Microondas LG MS2536GIS", 11.0, 0.54, 0.417, 0.294, 10, -12.054500, -77.117600)); // Callao
+
+    productosBase.push_back(Producto(401, "Televisor TCL SMART TV 65 QLED 4K UHD", 17.3, 0.30, 1.44, 0.83 , 0.0, -12.079270, -77.063227)); // Pueblo Libre
+    productosBase.push_back(Producto(402, "Televisor Samsung Smart TV 50 LED 4K UHD", 9.5, 0.25, 1.12, 0.69, 0.0, -12.122452, -77.031293)); // Miraflores
+    productosBase.push_back(Producto(403, "Televisor LG Smart TV 55 Nanocell 4K UHD", 14.1, 0.23, 1.23, 0.78, 0.0, -12.097622, -77.036002)); // San Isidro
+    productosBase.push_back(Producto(404, "Televisor Philips 50 4K Ultra HD Google TV", 9.31, 0.25, 1.11, 0.71, 0.0, -12.085846, -76.971214)); // La Molina
+
+    productosBase.push_back(Producto(501, "Aspiradora Bosch Serie 4", 8.3, 0.58, 0.36, 0.31, 0, -12.053728, -76.948494)); // Ate
+    productosBase.push_back(Producto(502, "Aspiradora Electrolux ERG36", 4.21, 0.15, 0.30, 0.69, 0, -12.107380, -76.996883)); // San Borja
+    productosBase.push_back(Producto(503, "Aspiradora Thomas TH-1870", 5.2 , 0.33, 0.28, 0.28, 0, -12.134781, -77.014236)); // Surquillo
+    productosBase.push_back(Producto(504, "Aspiradora Electrolux PTE10", 2.3, 0.27, 0.31, 1.28, 0, -12.140356, -76.985933)); // Surco
+
+    productosBase.push_back(Producto(601, "Horno Eléctrico Modelo 1", 9.1, 0.78, 0.54, 0.54, 8, -12.158560, -76.989342)); // San Juan de Miraflores
+    productosBase.push_back(Producto(602, "Horno Eléctrico Modelo 2", 7.10, 0.43, 0.51, 0.41, 6, -12.054500, -77.117600)); // Callao
+    productosBase.push_back(Producto(603, "Horno Eléctrico Modelo 3", 7.25, 0.43, 0.52, 0.38, 6, -12.079270, -77.063227)); // Pueblo Libre
+    productosBase.push_back(Producto(604, "Horno Eléctrico Modelo 4", 7.50, 0.42, 0.42, 0.36, 6, -12.122452, -77.031293)); // Miraflores
+
+    productosBase.push_back(Producto(701, "Cocina Klimatic Munchen", 26.6, 0.552, 0.495, 0.85, 15, -12.097622, -77.036002)); // San Isidro
+    productosBase.push_back(Producto(702, "Cocina MABE EMP5120GP1", 24.5, 0.540, 0.52, 0.915, 15, -12.085846, -76.971214)); // La Molina
+    productosBase.push_back(Producto(703, "Cocina Indurama Parma Zafiro", 45.82, 0.636, 0.76, 0.95, 20, -12.053728, -76.948494)); // Ate
+    productosBase.push_back(Producto(704, "Cocina MABE CMP5140FX0", 28.3, 0.540, 0.52, 0.925, 15, -12.107380, -76.996883)); // San Borja
+
+    productosBase.push_back(Producto(801, "Licuadora Miray LIM-9", 1.3, 0.133, 0.22, 0.35, 0, -12.134781, -77.014236)); // Surquillo
+    productosBase.push_back(Producto(802, "Licuadora Oster 250-22", 3.74, 0.23, 0.19, 0.335, 0, -12.140356, -76.985933)); // Surco
+    productosBase.push_back(Producto(803, "Licuadora Thomas TH-780VR", 4.7, 0.22, 0.29, 0.38, 0, -12.158560, -76.989342)); // San Juan de Miraflores
+
     return productosBase;
-    
 }
 
 vector <Vehiculo> obtenerVehiculos(){
