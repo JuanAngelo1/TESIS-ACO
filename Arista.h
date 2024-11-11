@@ -28,7 +28,7 @@ private:
     
 public:
     
-    Arista(Nodo* origen, Nodo* destino, double feromonaInicial = 1.0, double heuristica= 1.0)
+    Arista(Nodo* origen, Nodo* destino, double feromonaInicial = 10.0, double heuristica= 10.0)
         : nodoOrigen(origen), nodoDestino(destino), feromona(feromonaInicial),costo(heuristica) {
         
     }

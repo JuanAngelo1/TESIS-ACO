@@ -114,7 +114,7 @@ public:
         double fitness = 0;
 
         // Desbalance de peso
-        double factorDesbalancePeso = calcularDesbalancePeso(vehiculo) * coefEsta;
+        double factorDesbalancePeso = calcularDesbalancePeso(vehiculo) * coefEsta/10;
 
         // Bonus por apilamiento
         double factorBonusApilamiento = calcularBonusApilamiento() * coefApilamiento;
@@ -122,22 +122,23 @@ public:
         // Factor de proximidad: premiar si el promedio de distancia es bajo
         double factorProx=calcularFactorProximidad();
         
-        double factorProximidad = (factorProx > 0) ? (1.0 / factorProx) * coefProximidad : 0.0;
+        double factorProximidad = (factorProx > 0) ? (1.0 / factorProx) * 100 *coefProximidad : 0.0;
 
         // Penalización por accesibilidad para el orden de entrega
-        double penalizacionAccesibilidad = calcularPenalizacionProximidadPuerta(vehiculo.getLargo(),vehiculo.getAncho()) * coefAccesibilidad;
+        double penalizacionAccesibilidad = calcularPenalizacionProximidadPuerta(vehiculo.getLargo(),vehiculo.getAncho()) * coefAccesibilidad*10;
+        
         
         // Cálculo final del fitness
-        fitness = factorBonusApilamiento + factorProximidad - penalizacionAccesibilidad - factorDesbalancePeso;
+        fitness = factorBonusApilamiento + factorProximidad - penalizacionAccesibilidad - factorDesbalancePeso + 10;
 
         // Asignar el fitness a la solución actual
         setFitness(fitness);
         
-        cout<<"Bonus Apilamiento: "<<factorBonusApilamiento<<endl;
-        cout<<"Bonus Proximidad: "<<factorProximidad<<endl;
-        cout<<"Penalización Accesibilidad: " << penalizacionAccesibilidad << endl;
-        cout<<"Penalizacion Desbalance: "<<factorDesbalancePeso<<endl;
-        cout<<"Fitness: "<<fitness<<endl;
+//        cout<<"Bonus Apilamiento: "<<factorBonusApilamiento<<endl;
+//        cout<<"Bonus Proximidad: "<<factorProximidad<<endl;
+//        cout<<"Penalización Accesibilidad: " << penalizacionAccesibilidad << endl;
+//        cout<<"Penalizacion Desbalance: "<<factorDesbalancePeso<<endl;
+//        cout<<"Fitness: "<<fitness<<endl;
 
     }
     
@@ -171,7 +172,7 @@ public:
             const Espacio& espacio = parEspacio.second;
             int cant=espacio.getPilaDeProductos().size();
             if (cant > 1) {  // Si hay más de un producto en el espacio, es apilado
-                bonusApilamiento += 0.1 * (cant - 1); // Suma un bonus por cada producto adicional en el apilamiento
+                bonusApilamiento += 10 * (cant - 1); // Suma un bonus por cada producto adicional en el apilamiento
             }
         }
         return bonusApilamiento;

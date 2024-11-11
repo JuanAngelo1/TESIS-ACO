@@ -13,12 +13,14 @@
 #include <map>
 #include <algorithm>
 
+#include "Variables.h"
 #include "Funciones.h"
 #include "Vehiculo.h"
 #include "Pedido.h"
 #include "Espacio.h"
 #include "Hormiga.h"
 #include "Producto.h"
+
 
 using namespace std;
 
@@ -114,7 +116,7 @@ Vehiculo SeleccionarVehiculo(Pedido ped, vector<Vehiculo> lista){
     Vehiculo vehiculoSeleccionado = lista[0];
     bool encontrado = false;
     
-//    cout<<"Volumen Pedidos:"<<ped.getVolumenTotalProductos()<<endl;
+//pp    cout<<"Volumen Pedidos:"<<ped.getVolumenTotalProductos()<<endl;
 
     for (Vehiculo v : lista) {
         // Primero, verificamos si la hora de salida del vehículo coincide con la prioridad
@@ -182,6 +184,8 @@ Solucion construirSolu(Grafo& grafo, vector<Producto>& productos, Hormiga& hormi
 
         vector<Arista*> aristasDisponibles = grafo.obtenerAristasDisponibles(nodoActual);
         vector<Arista*> aristasFiltradas = filtrarAristas(aristasDisponibles, productos, hormiga.obtenerSolucion());
+        
+        contadorAristas+=aristasFiltradas.size();
         
         if (aristasFiltradas.empty()) {
 //            cout << "No hay aristas disponibles para productos no cargados. Terminando." << endl;
@@ -422,24 +426,46 @@ ResultadoEspacio buscarEspacioDisponible(const Coordenada& coordenadasNodo, map<
 }
 
 void actualizarFeromonasOffline(const Solucion& mejorSol, Grafo& grafo, double rho, double Q) {
+    // Calcular el incremento de feromonas basado en el fitness de la mejor solución
+    double incFerom = mejorSol.getFitness()*Q;
     
-    // Calcula el incremento de feromona basado en el fitness de la mejor solución
-    double incrementoFeromona = Q / mejorSol.getFitness();
-
-    // Recorre todas las aristas del grafo
+    if(incFerom<0)
+        incFerom=0;
+    
+    incrementoFeromona=incFerom;
+    
+    // Recorrer todas las aristas del grafo para actualizar las feromonas
     for (Arista* arista : grafo.getAristas()) {
         double feromonaActual = arista->getFeromona();
+        double nuevaFeromona;
 
-        // Verifica si la arista forma parte de la mejor solución
         if (mejorSol.contieneArista(arista)) {
             // Refuerza la feromona en la arista de la mejor solución
-            arista->setFeromona((1 - rho) * feromonaActual + rho * incrementoFeromona);
-            
+            nuevaFeromona = (1 - rho) * feromonaActual + incFerom;
         } else {
-            //Se evapora las feromonas de las demás aristas
-            arista->setFeromona((1 - rho) * feromonaActual);
+            // Evapora la feromona de las demás aristas
+            nuevaFeromona = (1 - rho) * feromonaActual;
         }
+
+        // Limita el valor de feromona para evitar sesgo extremo
+        if (nuevaFeromona > 10.0) { 
+            nuevaFeromona = 10.0;
+        }
+
+        arista->setFeromona(nuevaFeromona);
     }
+}
+
+
+double obtenerPromedio(vector<Solucion> solus){
+    
+    double prom=0;
+    int cant=solus.size();
+    
+    for(Solucion sol: solus){
+        prom+=sol.getFitness();
+    }
+    return prom/cant;
 }
 
 

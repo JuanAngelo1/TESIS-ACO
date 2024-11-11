@@ -35,6 +35,15 @@ public:
        
     }
     
+    void imprimirRuta() const {
+        cout << "Ruta seguida por la hormiga: ";
+        for (const Nodo* nodo : recorrido) {
+            cout << nodo->getIdProducto() << " -> ";  // Suponiendo que Nodo tiene un método getId() para obtener el identificador del nodo
+        }
+        cout << "Fin de la ruta" << endl;
+    }
+
+    
     void agregarAristaSolucion(Arista *arista){
         solucionActual.agregarAristaUsada(arista);
     }

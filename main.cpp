@@ -11,6 +11,7 @@
 #include <fstream>
 #include <vector>
 #include <math.h>
+#include <ctime> 
 
 #include "Colonia.h"
 #include "Vehiculo.h"
@@ -24,6 +25,9 @@
 #include "Coordenada.h"
 #include "Rutas.h"
 
+int contadorAristas=0;
+double incrementoFeromona=0;
+
 using namespace std;
 
 int main(int argc, char** argv) {
@@ -35,14 +39,14 @@ int main(int argc, char** argv) {
     vector<Producto> productosBase = obtenerProductosBase();
     
     //Inicializar cantidades para pedido prueba
-    vector<int> cantidad = {1, 1, 0, 1,   // Refrigeradoras (cuatro)
-                            0, 0, 1,      // Lavadoras (tres modelos)
-                            0, 1, 0,      // Microondas (tres modelos)
-                            1, 1, 1, 1,   // Televisores (cuatro modelos)
-                            1, 1, 1, 1,   // Aspiradoras (cuatro modelos)
+    vector<int> cantidad = {1, 0, 1, 1,   // Refrigeradoras (cuatro)
+                            1, 0, 1,      // Lavadoras (tres modelos)
+                            1, 0, 1,      // Microondas (tres modelos)
+                            1, 1, 0, 1,   // Televisores (cuatro modelos)
+                            1, 0, 0, 1,   // Aspiradoras (cuatro modelos)
                             1, 0, 1, 0,   // Hornos eléctricos (cuatro modelos)
                             1, 0, 1, 0,   // Cocinas (cinco modelos)
-                            1, 1, 1};     // Licuadoras (tres modelos)
+                            1, 0, 1};     // Licuadoras (tres modelos)
     
     //Productos a cargar generados
     vector<Producto> productosCargar = generarProductos(productosBase,cantidad);
@@ -53,9 +57,7 @@ int main(int argc, char** argv) {
     //En caso haya más pedidos se debera realizar bucle
 //    vector<Pedido> listaPedidos;
 //    listaPedidos.push_back(pedido1);
- 
-    double coefV=0.65,coefVa=0.10;
-    
+     
     Vehiculo vehiculo=SeleccionarVehiculo(pedido1,listaVehiculos);
     double maxX = vehiculo.getLargo(); // Dimensión máxima X (largo)
     double maxY = vehiculo.getAncho(); // Dimensión máxima Y (ancho)
@@ -66,17 +68,22 @@ int main(int argc, char** argv) {
     int numIter=0, sinMej=0,cantSoluciones=0;
     int cantNodos,numAristas;
     Solucion mejorSol;
-    mejorSol.setFitness(-10000);
-    
-    double alpha = 1.6, beta = 0.3;
+    mejorSol.setFitness(-1000);
+    Solucion solAnterior;
+    solAnterior.setFitness(-1000);
+    double alpha = 1.5, beta = 0.3;
     double rho = 0.5; // Tasa de evaporación
-    double Q = 100.0; // Constante para el depósito de feromonas
+    double Q = 0.3; // Constante para el depósito de feromonas
     
-    double coefEsta=0.01,coefApilamiento=10 ,coefProximidad= 10,coefAccesibilidad=0.9; 
-    int iterMax = 70, tolerancia = 40;
+    double coefEsta=0.2,coefApilamiento=0.2 ,coefProximidad= 0.4,coefAccesibilidad=0.2; 
+    int iterMax = 70, tolerancia = 30;
     
-    int numHormigas = 60;
-        
+    int numHormigas = 100;
+    
+    int numCorrida=0,corridasMax=2;
+    
+    unsigned t0, t1;
+ 
     Colonia colonia(numHormigas,iterMax,rho,alpha,beta);
     
     //Coordenadas Tienda
@@ -84,71 +91,102 @@ int main(int argc, char** argv) {
     
     optimizarRuta(productosCargar,tiendaOrigen.x,tiendaOrigen.y);
     
-//    for(int i=0; i<productosCargar.size();i++){
-//        cout<<productosCargar[i].getNombre()<<"-"<<productosCargar[i].getOrden()<<endl;
-//    }
-    
-    
-    while(numIter < iterMax && sinMej < tolerancia){
-//        cout << "Iteración: " << numIter + 1 << endl;
-    
+    while(numCorrida < corridasMax){
+        
         Grafo grafo;
         cantNodos=grafo.generarNodosAleatorios(productosCargar, maxX, maxY, posxProducto);
-        numAristas=cantNodos*30;
-        
+        numAristas=cantNodos*(cantNodos-1);
+
         grafo.generarAristasAleatorias(numAristas,50);
         grafo.conectarProductos(productosCargar.size(), posxProducto);
         
-//        cout<<numAristas<<endl;
-      
-        vector<Solucion> soluciones;
-        Solucion mejorSolIter;
+        numIter=0,sinMej=0;
         
-        //Las hormigas se renuevan y toman un nuevo nodo aleatorio del grafo
-        colonia.inicializarColonia(grafo);
-        vector<Hormiga> hormigas=colonia.getHormigas();
-        Solucion solActual;
-        
-        //Aqui las hormigas recorren el grafo
-        for(int h = 0 ; h < numHormigas ; h++){
-            Hormiga& hormiga = hormigas[h];
+        while(numIter < iterMax && sinMej < tolerancia){
 
-            hormiga.iniciarSolu(volMax,pesoMax,productosCargar);
+            vector<Solucion> soluciones;
+            Solucion mejorSolIter;
+
+            //Las hormigas se renuevan y toman un nuevo nodo aleatorio del grafo
+            colonia.inicializarColonia(grafo);
+            vector<Hormiga> hormigas=colonia.getHormigas();
+            Solucion solActual;
+
+            t0=clock();
+
+            //Aqui las hormigas recorren el grafo
+            for(int h = 0 ; h < numHormigas ; h++){
+                Hormiga& hormiga = hormigas[h];
+
+                hormiga.iniciarSolu(volMax,pesoMax,productosCargar);
+
+                //Se construye la solu
+                solActual=construirSolu(grafo,productosCargar,hormiga,alpha,beta,vehiculo); 
+
+                if(solActual.getEsValida()){ 
+                    cantSoluciones++;
+    //                cout<<"Solucion #"<<cantSoluciones<<endl;
+    //                cout<<"Hormiga Numero: "<<h+1<<endl;
+                    solActual.calcularFitness(vehiculo,coefEsta,coefApilamiento,coefProximidad,coefAccesibilidad);
+    //                hormiga.imprimirRuta();
+    //                solActual.imprimirEspaciosSolucion();
+                    soluciones.push_back(solActual);
+                }
+            }
+
+            t1=clock();
+
+            mejorSolIter = mejorSolucion(soluciones);
             
-            //Se construye la solu
-            solActual=construirSolu(grafo,productosCargar,hormiga,alpha,beta,vehiculo); 
+            if(mejorSolIter.getFitness() > mejorSol.getFitness()){
+                mejorSol=mejorSolIter;
+                sinMej=0;
+            }else
+                sinMej++;
             
-            if(solActual.getEsValida()){ 
-                cantSoluciones++;
-                cout<<"Solucion #"<<cantSoluciones<<endl;
-                solActual.calcularFitness(vehiculo,coefEsta,coefApilamiento,coefProximidad,coefAccesibilidad);
-                soluciones.push_back(solActual);
-            }  
+            
+            // Actualiza las feromonas en el grafo usando la mejor solución
+            actualizarFeromonasOffline(mejorSolIter, grafo, rho, Q); 
+
+            //PRUEBA CAJA BLANCA PARA ITERACIONES
+
+            double fitnessProm=obtenerPromedio(soluciones);
+            if(soluciones.size()>=1 && mejorSolIter.getFitness() > solAnterior.getFitness()){
+                cout<< "Corrida: "<<numCorrida + 1<<endl;
+                cout <<"Iteración: " << numIter + 1<<endl;
+                cout <<"Aristas Evaluadas: "<<contadorAristas<<endl;
+                cout <<"Soluciones validas: "<<soluciones.size()<<endl;
+                cout <<"Incremento Feromona Total: "<<incrementoFeromona<<endl;
+                cout <<"Fitness Promedio: "<< fitnessProm<<endl;
+                cout <<"Mejor Fitness Iteracion: "<< mejorSolIter.getFitness()<<endl;
+                double time = (double(t1-t0)/CLOCKS_PER_SEC);
+                cout << "Execution Time: " << time << endl;
+                cout<<endl;
+                solAnterior=mejorSolIter;
+            }
+
+            contadorAristas=0;
+            incrementoFeromona=0;
+
+            // Limpiar los datos innecesarios en cada solución después de actualizar feromonas
+            for (Solucion& sol : soluciones) {
+                sol.limpiarSolucion();
+            }
+            
+            numIter++;
         }
-        
-        mejorSolIter = mejorSolucion(soluciones);
-        
-        if(mejorSolIter.getFitness() > mejorSol.getFitness()){
-            mejorSol=mejorSolIter;
-            sinMej=0;
-        }else
-            sinMej++;
-         
-        // Actualiza las feromonas en el grafo usando la mejor solución
-        actualizarFeromonasOffline(mejorSolIter, grafo, rho, Q); // Usa la mejor solución directamente
-        
-        // Limpiar los datos innecesarios en cada solución después de actualizar feromonas
-        for (Solucion& sol : soluciones) {
-            sol.limpiarSolucion();
-        }
-    
-        numIter++;
+//        cout <<"Mejor Fitness: "<< mejorSol.getFitness()<<endl<<endl;
+      
+        numCorrida++;
     }
-        cout<<endl;
-        cout<<"Cantidad de Soluciones Encontradas: "<<cantSoluciones<<endl;
-        cout<<"Mejor Solución:"<<endl;
-        mejorSol.imprimirProductosCargados();
-        mejorSol.imprimirSolu();
-        mejorSol.imprimirEspaciosSolucion();
-        
+    
+
+    
+    cout<<endl;
+    cout<<"Cantidad de Soluciones Encontradas: "<<cantSoluciones<<endl;
+    cout<<"Mejor Solución:"<<endl;
+    mejorSol.imprimirProductosCargados();
+    mejorSol.imprimirSolu();
+    mejorSol.imprimirEspaciosSolucion();
+
 }

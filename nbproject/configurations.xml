@@ -51,6 +51,7 @@
       <logicalFolder name="f3" displayName="Funciones" projectFiles="true">
         <itemPath>Funciones.cpp</itemPath>
         <itemPath>Rutas.cpp</itemPath>
+        <itemPath>Variables.h</itemPath>
       </logicalFolder>
       <itemPath>main.cpp</itemPath>
     </logicalFolder>
@@ -131,6 +132,8 @@
       </item>
       <item path="TipoProducto.h" ex="false" tool="3" flavor2="0">
       </item>
+      <item path="Variables.h" ex="false" tool="3" flavor2="0">
+      </item>
       <item path="Vehiculo.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="Vehiculo.h" ex="false" tool="3" flavor2="0">
@@ -209,6 +212,8 @@
       <item path="TipoProducto.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="TipoProducto.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="Variables.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="Vehiculo.cpp" ex="false" tool="1" flavor2="0">
       </item>

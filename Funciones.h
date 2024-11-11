@@ -65,4 +65,6 @@ void imprimirEspaciosSolucion(map<Coordenada, Espacio>& );
 
 void actualizarFeromonasOffline(const Solucion& , Grafo& , double , double );
 
+double obtenerPromedio(vector<Solucion> );
+
 #endif /* FUNCIONES_H */
