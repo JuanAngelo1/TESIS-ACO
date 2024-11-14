@@ -21,7 +21,6 @@
 #include "Hormiga.h"
 #include "Producto.h"
 
-
 using namespace std;
 
 int obtenerCantidad(vector<Producto> productos){
@@ -49,10 +48,10 @@ vector<Producto> obtenerProductosBase() {
     productosBase.push_back(Producto(302, "Horno Microondas Indurama MWI-20TCRP", 11.23, 0.48, 0.38, 0.29, 10, -12.158560, -76.989342)); // San Juan de Miraflores
     productosBase.push_back(Producto(303, "Horno Microondas LG MS2536GIS", 11.0, 0.54, 0.417, 0.294, 10, -12.054500, -77.117600)); // Callao
 
-    productosBase.push_back(Producto(401, "Televisor TCL SMART TV 65 QLED 4K UHD", 17.3, 0.30, 1.44, 0.83 , 0.0, -12.079270, -77.063227)); // Pueblo Libre
-    productosBase.push_back(Producto(402, "Televisor Samsung Smart TV 50 LED 4K UHD", 9.5, 0.25, 1.12, 0.69, 0.0, -12.122452, -77.031293)); // Miraflores
-    productosBase.push_back(Producto(403, "Televisor LG Smart TV 55 Nanocell 4K UHD", 14.1, 0.23, 1.23, 0.78, 0.0, -12.097622, -77.036002)); // San Isidro
-    productosBase.push_back(Producto(404, "Televisor Philips 50 4K Ultra HD Google TV", 9.31, 0.25, 1.11, 0.71, 0.0, -12.085846, -76.971214)); // La Molina
+    productosBase.push_back(Producto(401, "Televisor TCL SMART TV 65 QLED 4K UHD", 17.3, 0.30, 1.09, 0.83 , 0.0, -12.079270, -77.063227)); // Pueblo Libre
+    productosBase.push_back(Producto(402, "Televisor Samsung Smart TV 50 LED 4K UHD", 9.5, 0.25, 0.95, 0.69, 0.0, -12.122452, -77.031293)); // Miraflores
+    productosBase.push_back(Producto(403, "Televisor LG Smart TV 55 Nanocell 4K UHD", 14.1, 0.23, 1.03, 0.78, 0.0, -12.097622, -77.036002)); // San Isidro
+    productosBase.push_back(Producto(404, "Televisor Philips 50 4K Ultra HD Google TV", 9.31, 0.25, 0.94, 0.71, 0.0, -12.085846, -76.971214)); // La Molina
 
     productosBase.push_back(Producto(501, "Aspiradora Bosch Serie 4", 8.3, 0.58, 0.36, 0.31, 0, -12.053728, -76.948494)); // Ate
     productosBase.push_back(Producto(502, "Aspiradora Electrolux ERG36", 4.21, 0.15, 0.30, 0.69, 0, -12.107380, -76.996883)); // San Borja
@@ -170,33 +169,32 @@ Solucion construirSolu(Grafo& grafo, vector<Producto>& productos, Hormiga& hormi
     // Nodo inicial aleatorio para la hormiga
     Nodo* nodoActual = hormiga.obtenerNodoActual();
     
-    crearPrimerEspacio(hormiga,espacios,vehiculo.getAlto(),productos);
+    bool encontrado=crearPrimerEspacio(hormiga,espacios,vehiculo.getAlto(),productos,vehiculo);
+ 
+    //En caso no encuentre para
+    if(encontrado){
+        hormiga.setValidez(false);
+        return hormiga.obtenerSolucion();
+    }
     
-    int i = 0;
-    int iterSinAvance = 0, maxIterSinAvance = 10;
-    bool soluEncontrada=false;
+    int i = 0, iterSinAvance = 0, maxIterSinAvance = 15;
+    bool soluEncontrada=false ,completa= false;
     
     // Recorre el grafo construyendo una solución
     while (!hormiga.esSolucionCompleta(productos) && iterSinAvance<maxIterSinAvance) {
-        
-//        cout << "Construyendo solución, iteración " << i + 1 << endl;       
-//        nodoActual->mostrarInfo();
-
+      
         vector<Arista*> aristasDisponibles = grafo.obtenerAristasDisponibles(nodoActual);
         vector<Arista*> aristasFiltradas = filtrarAristas(aristasDisponibles, productos, hormiga.obtenerSolucion());
-        
-        contadorAristas+=aristasFiltradas.size();
-        
+                
         if (aristasFiltradas.empty()) {
 //            cout << "No hay aristas disponibles para productos no cargados. Terminando." << endl;
             break;
         }
-
+        
         // Seleccionar una arista basado en probabilidades de feromona y heurística
         Arista* aristaSeleccionada = calcularYSeleccionarArista(aristasFiltradas, espacios, productos, alpha, beta);
         
-//        aristaSeleccionada->mostrarInfo(1);
-
+            
         if (!aristaSeleccionada) {
             cout << "No se pudo seleccionar una arista válida, terminando." << endl;
             break;
@@ -212,15 +210,13 @@ Solucion construirSolu(Grafo& grafo, vector<Producto>& productos, Hormiga& hormi
         Coordenada coordenadasNodoDestino(nodoSiguiente->getPosX(), nodoSiguiente->getPosY());
 
         // Verificar si el producto se puede colocar en un espacio existente o si necesitamos crear uno nuevo
-        ResultadoEspacio resultado = buscarEspacioDisponible(coordenadasNodoDestino, espacios, productoDestino, coordenadasNodoDestino.x, coordenadasNodoDestino.y);
+        ResultadoEspacio resultado = buscarEspacioDisponible(espacios, productoDestino, coordenadasNodoDestino.x, coordenadasNodoDestino.y,vehiculo);
 
         if (resultado == PUDO_APILAR || resultado == NO_HAY_COLISION) {
-
+            
             if (resultado == NO_HAY_COLISION) {
                 // Crear un nuevo espacio si no hubo colisión
                 crearNuevoEspacio(coordenadasNodoDestino, espacios, productoDestino, coordenadasNodoDestino.x, coordenadasNodoDestino.y, 0, vehiculo.getAlto());
-//                imprimirEspaciosSolucion(espacios);
-//                cout<<endl<<endl;   
             }
             // Agregar el nodo destino a la solución
             hormiga.guardarProducto(productoDestino,nodoSiguiente);
@@ -228,74 +224,243 @@ Solucion construirSolu(Grafo& grafo, vector<Producto>& productos, Hormiga& hormi
             nodoActual=nodoSiguiente;
             iterSinAvance=0;
         } else {
-//            if(resultado == NO_SE_PUDO_APILAR)
-//                cout<<"-----------NO SE PUDO APILAR-----------"<<endl;
-            iterSinAvance++;
-            //continue;
+            
+            if(resultado == NO_SE_PUDO_APILAR || resultado == ESPACIO_INVALIDO){           
+                iterSinAvance++;
+            }
         }
-
+//        cout<<iterSinAvance<<endl;
         i++;
     }
     
-    bool completa=hormiga.esSolucionCompleta(productos);
+    completa =hormiga.esSolucionCompleta(productos);
     
     if (iterSinAvance >= maxIterSinAvance || !completa) {
         hormiga.setValidez(false);
-//        cout << "No solución" << endl;
+        
     }else{
         hormiga.setValidez(true);
-        soluEncontrada=true;
-//        cout << "---Solucion Completa---"<<endl;
+        soluEncontrada=true;        
     }
         
     if(soluEncontrada){
+//        cout<<"Encontrada"<<endl;
         hormiga.setEspaciosSolucion(espacios);
-//        Solucion soluFinal= hormiga.obtenerSolucion();
-    
-    //  soluFinal.imprimirEspaciosSolucion();
-
-//        soluFinal.imprimirProductosCargados();
     }
     
     return hormiga.obtenerSolucion();
 }
 
-void crearPrimerEspacio(Hormiga& hormiga,map<Coordenada, Espacio>& espacios, double alturaVehiculo,vector<Producto>& productos){
+bool crearPrimerEspacio(Hormiga& hormiga, map<Coordenada, Espacio>& espacios, double alturaVehiculo, vector<Producto>& productos, Vehiculo& vehiculo) {
     
-    Nodo* nodoActual= hormiga.obtenerNodoActual();
-    
+    Nodo* nodoActual = hormiga.obtenerNodoActual();
     Producto& producto = productos[nodoActual->getIdProducto() - 1];
-    
-    double posX=nodoActual->getPosX();
-    double posY=nodoActual->getPosY();
+
+    double posX = nodoActual->getPosX();
+    double posY = nodoActual->getPosY();
+
+    // Intentar colocar el producto dentro de los límites del vehículo en cada orientación posible
+    bool encontrado = false;
+    for (int i = 0; i < 4; ++i) { // Máximo 4 orientaciones posibles
+        if (cabeEnLimitesVehiculo(posX, posY, producto, vehiculo)) {
+            encontrado = true;
+            break;
+        }
+
+        // Cambiar orientación y ajustar coordenadas según la orientación actual del producto
+        producto.cambiarOrientacion();
+        
+        // Actualizar coordenadas en función de la nueva orientación
+        switch (producto.getOrientacion()) {
+            case Producto::ARRIBA_DERECHA:
+                break;
+            case Producto::ARRIBA_IZQUIERDA:
+                posX -= producto.getLargo();
+                break;
+            case Producto::ABAJO_DERECHA:
+                posY -= producto.getAncho();
+                break;
+            case Producto::ABAJO_IZQUIERDA:
+                posX -= producto.getLargo();
+                posY -= producto.getAncho();
+                break;
+        }
+    }
+
+    if (!encontrado) {
+        return encontrado;
+    }
+
+    // Crear un nuevo espacio con la altura y posición final del producto
+    Espacio nuevoEspacio(alturaVehiculo, posX, posY, 0, 0);
+    nuevoEspacio.agregarProducto(&producto);
     
     Coordenada coordenada(posX, posY);
-    
-    // Crear un nuevo espacio con la altura del primer producto
-    Espacio nuevoEspacio(alturaVehiculo, posX, posY, 0, 0);
-    
-    nuevoEspacio.agregarProducto(&producto);
-    
     // Agregar el nuevo espacio al mapa de espacios
     espacios.emplace(coordenada, nuevoEspacio);
-    
 }
 
-void crearNuevoEspacio(const Coordenada& coordenadas, map<Coordenada, Espacio>& espacios, Producto& producto, 
-        double posX, double posY, double posZ, double alturaVehiculo) {
-    
-    // Crear un nuevo espacio con la altura del primer producto
-    Espacio nuevoEspacio(alturaVehiculo, posX, posY, posZ, 0);
-    
+void crearNuevoEspacio(const Coordenada& coordenadas, map<Coordenada, Espacio>& espacios, Producto& producto,
+                       double posX, double posY, double posZ, double alturaVehiculo) {
+
+    // Ajustar `posX` y `posY` en función de la orientación actual del producto
+    switch (producto.getOrientacion()) {
+        case Producto::ARRIBA_DERECHA:
+            // No se requiere ajuste
+            break;
+        case Producto::ARRIBA_IZQUIERDA:
+            posX -= producto.getLargo(); // Mover hacia la izquierda
+            break;
+        case Producto::ABAJO_DERECHA:
+            posY -= producto.getAncho(); // Mover hacia abajo
+            break;
+        case Producto::ABAJO_IZQUIERDA:
+            posX -= producto.getLargo(); // Mover hacia la izquierda
+            posY -= producto.getAncho(); // Mover hacia abajo
+            break;
+    }
+
+    // Crear el nuevo espacio con las coordenadas ajustadas
+    Espacio nuevoEspacio(alturaVehiculo, posX, posY, posZ,0);
     nuevoEspacio.agregarProducto(&producto);
-    
-    // Asignar las dimensiones del primer producto
+
+    // Asignar las dimensiones del producto en el nuevo espacio
     nuevoEspacio.setLargo(producto.getLargo());
     nuevoEspacio.setAncho(producto.getAncho());
 
-    // Agregar el nuevo espacio al mapa de espacios
-    espacios.emplace(coordenadas, nuevoEspacio);
+    // Agregar el nuevo espacio al mapa de espacios con las coordenadas ajustadas
+    Coordenada coordAjustada(posX, posY);
+    espacios.emplace(coordAjustada, nuevoEspacio);
+}
 
+
+bool hayColision(double xExistente, double largoExistente, double yExistente, double anchoExistente, 
+                 double xNuevo, double largoNuevo, double yNuevo, double anchoNuevo) {
+    // Verificar si las coordenadas del nuevo espacio caen dentro de las dimensiones del espacio existente
+    bool colisionX = (xNuevo < (xExistente + largoExistente)) && ((xNuevo + largoNuevo) > xExistente);
+    bool colisionY = (yNuevo < (yExistente + anchoExistente)) && ((yNuevo + anchoNuevo) > yExistente);
+
+    // Si hay colisión en ambos ejes, retornamos true
+    return colisionX && colisionY;
+}
+
+
+ResultadoEspacio buscarEspacioDisponible(map<Coordenada, Espacio>& espacios, Producto& producto, double posX, double posY,Vehiculo& vehiculo) {
+    
+    // Verificar si el producto excede los límites del vehículo en su orientación actual
+    if (!cabeEnLimitesVehiculo(posX, posY, producto, vehiculo)) {
+        // Intentar cambiar la orientación hasta encontrar una que permita colocar el producto
+        bool encontrado = false;
+        for (int i = 0; i < 4; ++i) {  // Máximo 4 orientaciones posibles
+            producto.cambiarOrientacion();
+            if (cabeEnLimitesVehiculo(posX, posY, producto, vehiculo)) {
+                encontrado = true;
+                break;
+            }
+        }
+        // Si ninguna orientación permite que el producto quepa, retornamos un estado especial
+        if (!encontrado) {
+            return ESPACIO_INVALIDO;
+        }
+    }
+    
+    // Ajustar posX y posY según la orientación final del producto
+    switch (producto.getOrientacion()) {
+        case Producto::ARRIBA_IZQUIERDA:
+            posX -= producto.getLargo(); // Mover hacia la izquierda
+            break;
+        case Producto::ABAJO_DERECHA:
+            posY -= producto.getAncho(); // Mover hacia abajo
+            break;
+        case Producto::ABAJO_IZQUIERDA:
+            posX -= producto.getLargo(); // Mover hacia la izquierda
+            posY -= producto.getAncho(); // Mover hacia abajo
+            break;
+        case Producto::ARRIBA_DERECHA:
+            // No se realiza ajuste
+            break;
+    }
+        
+    for (pair<const Coordenada, Espacio>& entry : espacios) {
+        Coordenada coordExistente = entry.first;
+        Espacio& espacioExistente = entry.second;
+
+        // Verificar si hay colisión entre las coordenadas del nodo actual y el espacio existente
+        if (hayColision(coordExistente.x, espacioExistente.getLargo(), coordExistente.y, espacioExistente.getAncho(), 
+                posX, producto.getLargo(), posY, producto.getAncho())) {
+            
+            // Si hay colisión, verificar si el producto puede ser apilado en ese espacio
+            if (espacioExistente.esApilable(&producto)) {
+                espacioExistente.agregarProducto(&producto);  // Apilar el producto en el espacio existente
+                return PUDO_APILAR;  // Producto apilado correctamente
+            } else {
+                return NO_SE_PUDO_APILAR;  // No se pudo apilar el producto por restricciones
+            }
+        }
+    }
+    
+    return NO_HAY_COLISION;  // No se encontró colisión con ningún espacio existente
+}
+
+bool cabeEnLimitesVehiculo(double posX, double posY, Producto& producto, Vehiculo& vehiculo) {
+    switch (producto.getOrientacion()) {
+        case Producto::ARRIBA_DERECHA:
+            return posX + producto.getLargo() <= vehiculo.getLargo() && posY + producto.getAncho() <= vehiculo.getAncho();
+        case Producto::ARRIBA_IZQUIERDA:
+            return posX - producto.getLargo() >= 0 && posY + producto.getAncho() <= vehiculo.getAncho();
+        case Producto::ABAJO_DERECHA:
+            return posX + producto.getLargo() <= vehiculo.getLargo() && posY - producto.getAncho() >= 0;
+        case Producto::ABAJO_IZQUIERDA:
+            return posX - producto.getLargo() >= 0 && posY - producto.getAncho() >= 0;
+        default:
+            return false;
+    }
+}
+
+
+
+void actualizarFeromonasOffline(const Solucion& mejorSol, Grafo& grafo, double rho, double Q) {
+    // Calcular el incremento de feromonas basado en el fitness de la mejor solución
+    double incFerom = mejorSol.getFitness()*Q;
+    
+    if(incFerom<0)
+        incFerom=0;
+   
+    // Recorrer todas las aristas del grafo para actualizar las feromonas
+    for (Arista* arista : grafo.getAristas()) {
+        double feromonaActual = arista->getFeromona();
+        double nuevaFeromona;
+
+        if (mejorSol.contieneArista(arista)) {
+            // Refuerza la feromona en la arista de la mejor solución
+            nuevaFeromona = (1 - rho) * feromonaActual + incFerom;
+        } else {
+            // Evapora la feromona de las demás aristas
+            nuevaFeromona = (1 - rho) * feromonaActual;
+        }
+
+        // Limita el valor de feromona para evitar sesgo extremo
+        if (nuevaFeromona > 15.0) { 
+            nuevaFeromona = 15.0;
+        }
+        
+        if(nuevaFeromona< 0.01){
+            nuevaFeromona=0.1;
+        }
+
+        arista->setFeromona(nuevaFeromona);
+    }
+}
+
+double obtenerPromedio(vector<Solucion> solus){
+    
+    double prom=0;
+    int cant=solus.size();
+    
+    for(Solucion sol: solus){
+        prom+=sol.getFitness();
+    }
+    return prom/cant;
 }
 
 void imprimirEspaciosSolucion(map<Coordenada, Espacio>& espaciosSolucion)  {
@@ -342,7 +507,7 @@ Arista* calcularYSeleccionarArista(const vector<Arista*>& aristasDisponibles, ma
 
         // Calcular la heurística para el nodo destino considerando la posición actual
         double heuristica = arista->getHeuristica(productoDestino, coordenadasNodoDestino, espacios);
-
+//        arista->setHeuristica(heuristica);
         // Probabilidad para la arista usando feromona y heurística
         double prob = pow(arista->getFeromona(), alpha) * pow(1.0 / heuristica, beta);
         probabilidades.push_back(prob);
@@ -391,82 +556,3 @@ Arista* seleccionarArista(const vector<double>& probabilidades, const vector<Ari
     // Si no se seleccionó ninguna arista (por redondeo o error), devolver la última
     return aristasDisponibles.back();
 }
-
-
-bool hayColision(double xExistente, double largoExistente, double yExistente, double anchoExistente, 
-                 double xNuevo, double largoNuevo, double yNuevo, double anchoNuevo) {
-    // Verificar si las coordenadas del nuevo espacio caen dentro de las dimensiones del espacio existente
-    bool colisionX = (xNuevo < (xExistente + largoExistente)) && ((xNuevo + largoNuevo) > xExistente);
-    bool colisionY = (yNuevo < (yExistente + anchoExistente)) && ((yNuevo + anchoNuevo) > yExistente);
-
-    // Si hay colisión en ambos ejes, retornamos true
-    return colisionX && colisionY;
-}
-
-
-ResultadoEspacio buscarEspacioDisponible(const Coordenada& coordenadasNodo, map<Coordenada, Espacio>& espacios, Producto& producto, double posX, double posY) {
-    for (pair<const Coordenada, Espacio>& entry : espacios) {
-        Coordenada coordExistente = entry.first;
-        Espacio& espacioExistente = entry.second;
-
-        // Verificar si hay colisión entre las coordenadas del nodo actual y el espacio existente
-        if (hayColision(coordExistente.x, espacioExistente.getLargo(), coordExistente.y, espacioExistente.getAncho(), posX, producto.getLargo(), posY, producto.getAncho())) {
-            
-            // Si hay colisión, verificar si el producto puede ser apilado en ese espacio
-            if (espacioExistente.esApilable(&producto)) {
-                espacioExistente.agregarProducto(&producto);  // Apilar el producto en el espacio existente
-                return PUDO_APILAR;  // Producto apilado correctamente
-            } else {
-                return NO_SE_PUDO_APILAR;  // No se pudo apilar el producto por restricciones
-            }
-        }
-    }
-
-    return NO_HAY_COLISION;  // No se encontró colisión con ningún espacio existente
-}
-
-void actualizarFeromonasOffline(const Solucion& mejorSol, Grafo& grafo, double rho, double Q) {
-    // Calcular el incremento de feromonas basado en el fitness de la mejor solución
-    double incFerom = mejorSol.getFitness()*Q;
-    
-    if(incFerom<0)
-        incFerom=0;
-    
-    incrementoFeromona=incFerom;
-    
-    // Recorrer todas las aristas del grafo para actualizar las feromonas
-    for (Arista* arista : grafo.getAristas()) {
-        double feromonaActual = arista->getFeromona();
-        double nuevaFeromona;
-
-        if (mejorSol.contieneArista(arista)) {
-            // Refuerza la feromona en la arista de la mejor solución
-            nuevaFeromona = (1 - rho) * feromonaActual + incFerom;
-        } else {
-            // Evapora la feromona de las demás aristas
-            nuevaFeromona = (1 - rho) * feromonaActual;
-        }
-
-        // Limita el valor de feromona para evitar sesgo extremo
-        if (nuevaFeromona > 10.0) { 
-            nuevaFeromona = 10.0;
-        }
-
-        arista->setFeromona(nuevaFeromona);
-    }
-}
-
-
-double obtenerPromedio(vector<Solucion> solus){
-    
-    double prom=0;
-    int cant=solus.size();
-    
-    for(Solucion sol: solus){
-        prom+=sol.getFitness();
-    }
-    return prom/cant;
-}
-
-
-

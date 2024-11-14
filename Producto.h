@@ -16,6 +16,14 @@
 using namespace std;
 
 class Producto {
+public:
+    enum Orientacion {
+        ARRIBA_DERECHA,     // Parte superior derecha del punto de referencia
+        ARRIBA_IZQUIERDA,   // Parte superior izquierda del punto de referencia
+        ABAJO_DERECHA,      // Parte inferior derecha del punto de referencia
+        ABAJO_IZQUIERDA     // Parte inferior izquierda del punto de referencia
+    };
+        
 private:
     int id_producto;
     string nombre;           
@@ -27,13 +35,21 @@ private:
     double latitudDestino;
     double longitudDestino;
     int ordenColocacion; 
+    
+    Orientacion orientacion; // Nuevo atributo para orientación
+    
 public:
     
+
+    
     // Constructor
-    Producto(int id, string n, double peso, double largo, double ancho, double alto, 
-            double limitePeso,double latitud, double longitud);
+    Producto(int id, string nombre, double peso, double largo, double ancho, double alto, 
+             double limitePeso, double latitudDestino, double longitudDestino);
     
     Producto();
+    
+    Orientacion getOrientacion() const;
+    void setOrientacion(Orientacion nuevaOrientacion);
 
     // Setters
     void setIdProducto(int id);
@@ -45,6 +61,8 @@ public:
     void setLimitePeso(double lp);
     void setDestino(double lon,double lat);
     void setOrdenColocacion(int i);
+    
+    void cambiarOrientacion();
     
     // Getters
     int getIdProducto() const;
@@ -58,8 +76,6 @@ public:
     double getLatitud()const;
     double getLongitud()const;
     int getOrden()const;
-
-
 
     // Mostrar información del tipo de producto
     void mostrarInformacion() const;

@@ -25,8 +25,6 @@
 #include "Coordenada.h"
 #include "Rutas.h"
 
-int contadorAristas=0;
-double incrementoFeromona=0;
 
 using namespace std;
 
@@ -39,14 +37,14 @@ int main(int argc, char** argv) {
     vector<Producto> productosBase = obtenerProductosBase();
     
     //Inicializar cantidades para pedido prueba
-    vector<int> cantidad = {1, 0, 1, 1,   // Refrigeradoras (cuatro)
+    vector<int> cantidad = {1, 0, 0, 1,   // Refrigeradoras (cuatro)
                             1, 0, 1,      // Lavadoras (tres modelos)
                             1, 0, 1,      // Microondas (tres modelos)
-                            1, 1, 0, 1,   // Televisores (cuatro modelos)
-                            1, 0, 0, 1,   // Aspiradoras (cuatro modelos)
+                            1, 0, 1, 1,   // Televisores (cuatro modelos)
+                            1, 0, 1, 1,   // Aspiradoras (cuatro modelos)
                             1, 0, 1, 0,   // Hornos eléctricos (cuatro modelos)
-                            1, 0, 1, 0,   // Cocinas (cinco modelos)
-                            1, 0, 1};     // Licuadoras (tres modelos)
+                            1, 0, 1, 1,   // Cocinas (cinco modelos)
+                            1, 1, 1};     // Licuadoras (tres modelos)
     
     //Productos a cargar generados
     vector<Producto> productosCargar = generarProductos(productosBase,cantidad);
@@ -71,16 +69,16 @@ int main(int argc, char** argv) {
     mejorSol.setFitness(-1000);
     Solucion solAnterior;
     solAnterior.setFitness(-1000);
-    double alpha = 1.5, beta = 0.3;
-    double rho = 0.5; // Tasa de evaporación
+    double alpha = 1.6, beta = 0.2;
+    double rho = 0.15; // Tasa de evaporación
     double Q = 0.3; // Constante para el depósito de feromonas
     
-    double coefEsta=0.2,coefApilamiento=0.2 ,coefProximidad= 0.4,coefAccesibilidad=0.2; 
+    double coefEsta=0.2,coefApilamiento=0.3 ,coefProximidad= 0.4,coefAccesibilidad=0.2; 
     int iterMax = 70, tolerancia = 30;
     
     int numHormigas = 100;
     
-    int numCorrida=0,corridasMax=2;
+    int numCorrida=0,corridasMax=5;
     
     unsigned t0, t1;
  
@@ -91,8 +89,14 @@ int main(int argc, char** argv) {
     
     optimizarRuta(productosCargar,tiendaOrigen.x,tiendaOrigen.y);
     
+//    for(int i=0;i<productosCargar.size();i++){
+//        productosCargar[i].mostrarInformacion();
+//    } 
+    
+//    cout<<"Ancho: "<<vehiculo.getAncho()<<endl;
+//    cout<<"Largo: "<<vehiculo.getLargo()<<endl;
     while(numCorrida < corridasMax){
-        
+        cout<<"Corrida "<< numCorrida+1<<endl;
         Grafo grafo;
         cantNodos=grafo.generarNodosAleatorios(productosCargar, maxX, maxY, posxProducto);
         numAristas=cantNodos*(cantNodos-1);
@@ -123,13 +127,10 @@ int main(int argc, char** argv) {
                 //Se construye la solu
                 solActual=construirSolu(grafo,productosCargar,hormiga,alpha,beta,vehiculo); 
 
-                if(solActual.getEsValida()){ 
+                if(solActual.getEsValida()){
+//                    cout<<"Sol Encontrada"<<endl;
                     cantSoluciones++;
-    //                cout<<"Solucion #"<<cantSoluciones<<endl;
-    //                cout<<"Hormiga Numero: "<<h+1<<endl;
-                    solActual.calcularFitness(vehiculo,coefEsta,coefApilamiento,coefProximidad,coefAccesibilidad);
-    //                hormiga.imprimirRuta();
-    //                solActual.imprimirEspaciosSolucion();
+                    solActual.calcularFitness(vehiculo,coefEsta,coefApilamiento,coefProximidad,coefAccesibilidad,0);
                     soluciones.push_back(solActual);
                 }
             }
@@ -144,43 +145,37 @@ int main(int argc, char** argv) {
             }else
                 sinMej++;
             
-            
             // Actualiza las feromonas en el grafo usando la mejor solución
             actualizarFeromonasOffline(mejorSolIter, grafo, rho, Q); 
 
             //PRUEBA CAJA BLANCA PARA ITERACIONES
 
-            double fitnessProm=obtenerPromedio(soluciones);
-            if(soluciones.size()>=1 && mejorSolIter.getFitness() > solAnterior.getFitness()){
-                cout<< "Corrida: "<<numCorrida + 1<<endl;
-                cout <<"Iteración: " << numIter + 1<<endl;
-                cout <<"Aristas Evaluadas: "<<contadorAristas<<endl;
-                cout <<"Soluciones validas: "<<soluciones.size()<<endl;
-                cout <<"Incremento Feromona Total: "<<incrementoFeromona<<endl;
-                cout <<"Fitness Promedio: "<< fitnessProm<<endl;
-                cout <<"Mejor Fitness Iteracion: "<< mejorSolIter.getFitness()<<endl;
-                double time = (double(t1-t0)/CLOCKS_PER_SEC);
-                cout << "Execution Time: " << time << endl;
-                cout<<endl;
-                solAnterior=mejorSolIter;
-            }
-
-            contadorAristas=0;
-            incrementoFeromona=0;
+//            double fitnessProm=obtenerPromedio(soluciones);
+//            if(soluciones.size()>=1 ){
+//                cout<< "Corrida: "<<numCorrida + 1<<endl;
+//                cout <<"Iteración: " << numIter + 1<<endl;
+//                cout <<"Aristas Evaluadas: "<<contadorAristas<<endl;
+//                cout <<"Soluciones validas: "<<soluciones.size()<<endl;
+//                cout <<"Incremento Feromona Total: "<<incrementoFeromona<<endl;
+//                cout <<"Fitness Promedio: "<< fitnessProm<<endl;
+//                cout <<"Mejor Fitness Iteracion: "<< mejorSolIter.getFitness()<<endl;
+//                double time = (double(t1-t0)/CLOCKS_PER_SEC);
+//                cout << "Execution Time: " << time << endl;
+//                cout<<endl;
+//                solAnterior=mejorSolIter;
+//            }
 
             // Limpiar los datos innecesarios en cada solución después de actualizar feromonas
+   
             for (Solucion& sol : soluciones) {
                 sol.limpiarSolucion();
             }
             
             numIter++;
-        }
-//        cout <<"Mejor Fitness: "<< mejorSol.getFitness()<<endl<<endl;
-      
+        } 
+        cout<<"Cantidad Soluciones: "<< cantSoluciones<<endl;
         numCorrida++;
     }
-    
-
     
     cout<<endl;
     cout<<"Cantidad de Soluciones Encontradas: "<<cantSoluciones<<endl;
@@ -188,5 +183,5 @@ int main(int argc, char** argv) {
     mejorSol.imprimirProductosCargados();
     mejorSol.imprimirSolu();
     mejorSol.imprimirEspaciosSolucion();
-
+    
 }

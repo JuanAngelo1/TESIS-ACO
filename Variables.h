@@ -8,9 +8,6 @@
 #ifndef VARIABLES_H
 #define VARIABLES_H
 
-extern int contadorAristas; // Declaración de la variable global
-
-extern double incrementoFeromona;
 
 #endif /* VARIABLES_H */
 

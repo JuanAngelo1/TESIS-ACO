@@ -46,13 +46,23 @@ public:
         if (pilaDeProductos.empty()) {
             return true;
         }
+        
+        double pesoAcumulado = nuevoProducto->getPeso();
+        
+        stack<Producto*> copiaPila = pilaDeProductos; // Hacemos una copia de la pila para no modificarla
+        while (!copiaPila.empty()) {
+            Producto* productoEnPila = copiaPila.top();
+            copiaPila.pop();
 
-        // Verificar restricciones de apilamiento (altura y dimensiones)
-        Producto* productoEnLaCima = pilaDeProductos.top();
-        if (!productoEnLaCima->esApilableSobre(nuevoProducto)) {
-            return false;  // No se puede apilar por restricciones del producto
+            // Verificar si el peso acumulado excede el límite de peso del producto actual en la pila
+            if (pesoAcumulado > productoEnPila->getLimitePeso()) {
+                return false; // No es apilable, se excede el límite
+            }
+
+            // Sumar el peso del producto en la pila al acumulado
+            pesoAcumulado += productoEnPila->getPeso();
         }
-
+        
         // Verificar restricciones de altura, largo y ancho
         if (alturaActual + nuevoProducto->getAltura() > alturaMaxima || 
             nuevoProducto->getLargo() > largo || nuevoProducto->getAncho() > ancho) {

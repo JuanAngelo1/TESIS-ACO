@@ -39,12 +39,16 @@ public:
     void setFeromona(double nuevaFeromona) {
         feromona = nuevaFeromona;
     }
+    
+    void setHeuristica(double heu){
+        costo=heu;
+    }
 
     void mostrarInfo(int i) const {
         cout <<i<<"-"<<"Arista entre productos " << nodoOrigen->getIdProducto() 
-             << " (Posición " << nodoOrigen->getPosicionProducto() << ") y " 
+             << " (Posición " << nodoOrigen->getPosicionProducto()+1 << ") y " 
              << nodoDestino->getIdProducto() 
-             << " (Posición " << nodoDestino->getPosicionProducto() << ")"
+             << " (Posición " << nodoDestino->getPosicionProducto()+1 << ")"
              << " - Feromona: " << feromona 
              << " - Costo (heurística): " << costo << endl;
     }

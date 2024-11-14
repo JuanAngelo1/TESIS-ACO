@@ -20,9 +20,9 @@ using namespace std;
 enum ResultadoEspacio {
     PUDO_APILAR,
     NO_SE_PUDO_APILAR,
-    NO_HAY_COLISION
+    NO_HAY_COLISION,
+    ESPACIO_INVALIDO
 };
-
 
 int obtenerCantidad(vector<Producto> productos);
 
@@ -47,19 +47,20 @@ Arista* seleccionarArista(const vector<double>& , const vector<Arista*>& );
 Arista* calcularYSeleccionarArista(const vector<Arista*>& , map<Coordenada, Espacio>& ,
         vector<Producto>& , double , double );
 
+bool cabeEnLimitesVehiculo(double , double , Producto& , Vehiculo& );
 
 bool hayColision(double , double , double , double ,
                  double , double , double , double );
 
-ResultadoEspacio buscarEspacioDisponible(const Coordenada& , map<Coordenada, Espacio>& , 
-        Producto& , double , double );
+ResultadoEspacio buscarEspacioDisponible(map<Coordenada, Espacio>& , 
+        Producto& , double , double , Vehiculo& );
 
 void crearNuevoEspacio(const Coordenada& , map<Coordenada, Espacio>& , Producto& , 
         double , double , double , double );
 
 vector<Arista*> filtrarAristas(const vector<Arista*>& , const vector<Producto>& , const Solucion& );
 
-void crearPrimerEspacio(Hormiga& ,map<Coordenada, Espacio>& , double ,vector<Producto>& );
+bool crearPrimerEspacio(Hormiga& , map<Coordenada, Espacio>& , double , vector<Producto>& productos, Vehiculo& );
 
 void imprimirEspaciosSolucion(map<Coordenada, Espacio>& );
 

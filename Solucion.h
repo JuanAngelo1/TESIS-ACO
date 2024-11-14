@@ -108,9 +108,7 @@ public:
         return penalizacionTotal;
     }
 
-
-    
-    void calcularFitness(Vehiculo& vehiculo, double coefEsta, double coefApilamiento, double coefProximidad, double coefAccesibilidad) {
+    void calcularFitness(Vehiculo& vehiculo, double coefEsta, double coefApilamiento, double coefProximidad, double coefAccesibilidad,int debug) {
         double fitness = 0;
 
         // Desbalance de peso
@@ -134,11 +132,23 @@ public:
         // Asignar el fitness a la solución actual
         setFitness(fitness);
         
-//        cout<<"Bonus Apilamiento: "<<factorBonusApilamiento<<endl;
-//        cout<<"Bonus Proximidad: "<<factorProximidad<<endl;
-//        cout<<"Penalización Accesibilidad: " << penalizacionAccesibilidad << endl;
-//        cout<<"Penalizacion Desbalance: "<<factorDesbalancePeso<<endl;
-//        cout<<"Fitness: "<<fitness<<endl;
+//        if(debug==1){
+//            
+//            cout<<"Bonus Apilamiento: "<<factorBonusApilamiento<<endl;
+//            cout<<"Cantidad Apilados: "<<calcularBonusApilamiento()<<endl;
+//
+//            cout<<"Bonus Proximidad: "<<factorProximidad<<endl;
+//            cout<<"Factor Proximidad:"<<factorProx<<endl;
+//
+//            cout<<"Penalización Accesibilidad: " << penalizacionAccesibilidad << endl;
+//            cout<<"Calculo Accesabildiad: "<< calcularPenalizacionProximidadPuerta(vehiculo.getLargo(),vehiculo.getAncho())<<endl;
+//
+//            cout<<"Penalizacion Desbalance: "<<factorDesbalancePeso<<endl;
+//            cout<<"Desbalance KG"<<calcularDesbalancePeso(vehiculo)<<endl;
+//
+//            cout<<"Fitness: "<<fitness<<endl;
+//        }
+
 
     }
     
