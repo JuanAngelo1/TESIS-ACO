@@ -67,8 +67,6 @@ int main(int argc, char** argv) {
     int cantNodos,numAristas;
     Solucion mejorSol;
     mejorSol.setFitness(-1000);
-    Solucion solAnterior;
-    solAnterior.setFitness(-1000);
     double alpha = 1.6, beta = 0.2;
     double rho = 0.15; // Tasa de evaporación
     double Q = 0.3; // Constante para el depósito de feromonas

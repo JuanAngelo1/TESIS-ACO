@@ -63,12 +63,6 @@ vector<vector<double>> calcularMatrizDistancias(const vector<Producto>& producto
         distancias[i + 1][0] = distanciaOrigen;
     }
     
-//    cout << "Distancias desde el origen a cada producto:\n";
-//    for (int i = 0; i < n; ++i) {
-//        cout << "Producto " << productos[i].getIdProducto() << ": "
-//             << fixed << setprecision(2) << distancias[0][i + 1] << " km\n";
-//    }
-
     return distancias;
 }
 

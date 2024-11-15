@@ -190,7 +190,7 @@ public:
 
 
     
-double calcularDesbalancePeso(const Vehiculo& vehiculo) {
+    double calcularDesbalancePeso(const Vehiculo& vehiculo) {
     double pesoFrontal = 0.0;
     double pesoTrasero = 0.0;
 

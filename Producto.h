@@ -39,9 +39,7 @@ private:
     Orientacion orientacion; // Nuevo atributo para orientación
     
 public:
-    
-
-    
+ 
     // Constructor
     Producto(int id, string nombre, double peso, double largo, double ancho, double alto, 
              double limitePeso, double latitudDestino, double longitudDestino);
