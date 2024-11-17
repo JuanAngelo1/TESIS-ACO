@@ -172,7 +172,7 @@ Solucion construirSolu(Grafo& grafo, vector<Producto>& productos, Hormiga& hormi
     bool encontrado=crearPrimerEspacio(hormiga,espacios,vehiculo.getAlto(),productos,vehiculo);
  
     //En caso no encuentre para
-    if(encontrado){
+    if(!encontrado){
         hormiga.setValidez(false);
         return hormiga.obtenerSolucion();
     }
@@ -298,6 +298,8 @@ bool crearPrimerEspacio(Hormiga& hormiga, map<Coordenada, Espacio>& espacios, do
     Coordenada coordenada(posX, posY);
     // Agregar el nuevo espacio al mapa de espacios
     espacios.emplace(coordenada, nuevoEspacio);
+    
+    return true;
 }
 
 void crearNuevoEspacio(const Coordenada& coordenadas, map<Coordenada, Espacio>& espacios, Producto& producto,

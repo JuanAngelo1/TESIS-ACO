@@ -40,9 +40,9 @@ int main(int argc, char** argv) {
     vector<int> cantidad = {1, 0, 0, 1,   // Refrigeradoras (cuatro)
                             1, 0, 1,      // Lavadoras (tres modelos)
                             1, 0, 1,      // Microondas (tres modelos)
-                            1, 0, 1, 1,   // Televisores (cuatro modelos)
+                            1, 0, 0, 1,   // Televisores (cuatro modelos)
                             1, 0, 1, 1,   // Aspiradoras (cuatro modelos)
-                            1, 0, 1, 0,   // Hornos eléctricos (cuatro modelos)
+                            1, 0, 0, 0,   // Hornos eléctricos (cuatro modelos)
                             1, 0, 1, 1,   // Cocinas (cinco modelos)
                             1, 1, 1};     // Licuadoras (tres modelos)
     
@@ -76,7 +76,7 @@ int main(int argc, char** argv) {
     
     int numHormigas = 100;
     
-    int numCorrida=0,corridasMax=5;
+    int numCorrida=0,corridasMax=1;
     
     unsigned t0, t1;
  
