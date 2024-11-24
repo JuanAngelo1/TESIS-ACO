@@ -14,6 +14,9 @@
 #include <stack>
 #include <unordered_set>  // Para el conjunto de productos visitados
 #include <unordered_map>
+#include <chrono> // Para std::chrono
+#include <cmath>  // Para round()
+#include <random>
 #include "Grafo.h"
 #include "Nodo.h"
 #include "Arista.h"
@@ -28,26 +31,37 @@ private:
 
 public:
     Grafo() {
-        srand(static_cast<unsigned>(time(0)));  // Inicializamos el generador de números aleatorios
     }
 
     // Generar nodos aleatorios
     int generarNodosAleatorios(vector<Producto> prods, double maxX, double maxY, int posicionesPorProducto) {
-        int idNodo=0;
-        
+        int idNodo = 0;
+
+        auto seed = std::chrono::steady_clock::now().time_since_epoch().count(); // Obtener semilla única basada en el tiempo
+        std::mt19937 rng(static_cast<unsigned>(seed));                           // Generador Mersenne Twister
+        std::uniform_real_distribution<> disX(0.0, maxX);                        // Distribución uniforme para X
+        std::uniform_real_distribution<> disY(0.0, maxY);    
+
         for (int i = 0; i < prods.size(); i++) {
-            for (int j = 0; j < posicionesPorProducto; j++) {  // Generar varias posiciones por producto
-                double x = round((static_cast<double>(rand()) / RAND_MAX * maxX) * 100.0) / 100.0;  // Redondear a 2 decimales
-                double y = round((static_cast<double>(rand()) / RAND_MAX * maxY) * 100.0) / 100.0;
-                Nodo* nuevoNodo = new Nodo(idNodo+1,prods[i].getIdProducto(),j,x, y, 0);  
+            for (int j = 0; j < posicionesPorProducto; j++) {
+                // Generar coordenadas aleatorias redondeadas a 2 decimales
+                double x = round(disX(rng) * 100.0) / 100.0;
+                double y = round(disY(rng) * 100.0) / 100.0;
+
+                // Crear un nuevo nodo
+                Nodo* nuevoNodo = new Nodo(idNodo + 1, prods[i].getIdProducto(), j, x, y, 0);
                 nodos.push_back(nuevoNodo);
+
+                idNodo++;
             }
         }
-        return nodos.size();
+
+        return nodos.size(); // Retorna el total de nodos creados
     }
     
+    
     void conectarProductos(int numProductos, int posicionesPorProducto) {
-        // Conectar los 46 productos de forma secuencial
+
         for (int i = 0; i < numProductos - 1; ++i) {
             // Seleccionar aleatoriamente una posición (nodo) del producto i
             int nodo1 = rand() % posicionesPorProducto + (i * posicionesPorProducto);
@@ -68,19 +82,29 @@ public:
 
         // Generar conexiones aleatorias entre nodos
     void generarAristasAleatorias(int numAristas, int minConexiones) {
+        // Inicializar el generador de números aleatorios con std::chrono
+        auto seed = std::chrono::steady_clock::now().time_since_epoch().count();
+        std::mt19937 rng(static_cast<unsigned>(seed));
+        std::uniform_int_distribution<> dist(0, nodos.size() - 1);
+
         // Paso 1: Asegurar conexiones mínimas para cada nodo
         for (int i = 0; i < nodos.size(); ++i) {
             int conexionesActuales = 0;
 
             // Conectar el nodo actual hasta alcanzar el mínimo de conexiones requerido
             while (conexionesActuales < minConexiones) {
-                int nodo2 = rand() % nodos.size();
+                int nodo2 = dist(rng); // Generar un índice aleatorio
 
                 // Evitar conectar el nodo consigo mismo o al mismo producto
                 if (nodo2 != i && nodos[i]->getIdProducto() != nodos[nodo2]->getIdProducto()) {
+                    
+                    cout<<"Conexion : "<<i<<" -> "<<nodo2<<endl;
                     // Verificar si ya existe la conexión para evitar duplicados
                     if (!existeConexion(i, nodo2)) {
                         Arista* nuevaArista = new Arista(nodos[i], nodos[nodo2]);
+                        
+                        nuevaArista->mostrarInfo(1);
+                        
                         aristas.push_back(nuevaArista);
                         conexionesActuales++;
                     }
@@ -89,19 +113,40 @@ public:
         }
 
         // Paso 2: Generar el resto de las conexiones aleatorias
-        for (int i = 0; i < numAristas; ++i) {
-            int nodo1 = rand() % nodos.size();
-            int nodo2 = rand() % nodos.size();
-
-            // Evitar conectar nodos consigo mismos o del mismo producto
-            while (nodo2 == nodo1 || nodos[nodo1]->getIdProducto() == nodos[nodo2]->getIdProducto()) {
-                nodo2 = rand() % nodos.size();
-            }
-
-            // Verificar si la conexión no existe antes de crearla
-            if (!existeConexion(nodo1, nodo2)) {
-                Arista* nuevaArista = new Arista(nodos[nodo1], nodos[nodo2]);
-                aristas.push_back(nuevaArista);
+//        for (int i = 0; i < numAristas; ++i) {
+//            int nodo1 = dist(rng); // Generar un índice aleatorio
+//            int nodo2 = dist(rng); // Generar otro índice aleatorio
+//
+//            // Evitar conectar nodos consigo mismos o del mismo producto
+//            while (nodo2 == nodo1 || nodos[nodo1]->getIdProducto() == nodos[nodo2]->getIdProducto()) {
+//                nodo2 = dist(rng);
+//            }
+//
+//            // Verificar si la conexión no existe antes de crearla
+//            if (!existeConexion(nodo1, nodo2)) {
+//                Arista* nuevaArista = new Arista(nodos[nodo1], nodos[nodo2]);
+//                aristas.push_back(nuevaArista);
+//            }
+//        }
+//        cout<<"End"<<endl<<endl;
+    }
+    
+    
+    void generarGrafoCompleto() {
+        int idProd1,idProd2; 
+        for (int i = 0; i < nodos.size(); i++) {
+            for (int j = 0; j < nodos.size(); j++) {
+                
+                idProd1=nodos[i]->getIdProducto();
+                idProd2= nodos[j]->getIdProducto();
+                if (i != j && nodos[i]->getIdProducto() != nodos[j]->getIdProducto()) {
+                    // Verificar si la conexión ya existe para evitar duplicados
+                    if (!existeConexion(i+1, j+1)) {
+//                        cout <<"Productos: "<<idProd1<<" - "<<idProd2<<endl;
+                        Arista* nuevaArista = new Arista(nodos[i], nodos[j]);
+                        aristas.push_back(nuevaArista);
+                    }
+                }
             }
         }
     }
@@ -119,6 +164,7 @@ public:
 
         return aristasDisponibles;  // Devolver las aristas disponibles
     }
+    
 
 
     // Mostrar información del grafo
@@ -150,14 +196,15 @@ public:
     
     bool existeConexion(int idNodo1, int idNodo2) const {
         for (const Arista* arista : aristas) {
-            // Verificar si existe una conexión entre idNodo1 y idNodo2 en ambas direcciones
-            if ((arista->getNodoInicial()->getIdNodo() == idNodo1 && arista->getNodoFinal()->getIdNodo() == idNodo2) ||
-                (arista->getNodoInicial()->getIdNodo() == idNodo2 && arista->getNodoFinal()->getIdNodo() == idNodo1)) {
-                return true;  // Conexión ya existe
+            // Verificar si existe una conexión del nodo1 al nodo2
+            if (arista->getNodoInicial()->getIdNodo() == idNodo1 &&
+                arista->getNodoFinal()->getIdNodo() == idNodo2) {
+                return true; // Conexión ya existe
             }
         }
-        return false;  // No existe conexión
+        return false; // No existe conexión
     }
+
 
     // Imprimir todas las aristas generadas
     void imprimirAristas() {

@@ -11,8 +11,13 @@
 #include <fstream>
 #include <vector>
 #include <iostream>
+#include <algorithm> 
 #include <map>
+#include <unordered_set>
+#include <math.h>
+#include <cmath>
 #include "Nodo.h"
+#include "Vehiculo.h"
 #include "Coordenada.h"
 
 using namespace std;
@@ -28,7 +33,7 @@ private:
     
 public:
     
-    Arista(Nodo* origen, Nodo* destino, double feromonaInicial = 10.0, double heuristica= 10.0)
+    Arista(Nodo* origen, Nodo* destino, double feromonaInicial = 1.0, double heuristica= 1.0)
         : nodoOrigen(origen), nodoDestino(destino), feromona(feromonaInicial),costo(heuristica) {
         
     }
@@ -45,9 +50,9 @@ public:
     }
 
     void mostrarInfo(int i) const {
-        cout <<i<<"-"<<"Arista entre productos " << nodoOrigen->getIdProducto() 
+        cout <<i<<"-"<<"Arista entre productos " << nodoOrigen->getIdProducto()<<" (Nodo "<<nodoOrigen->getIdNodo()<<")" 
              << " (Posición " << nodoOrigen->getPosicionProducto()+1 << ") y " 
-             << nodoDestino->getIdProducto() 
+             << nodoDestino->getIdProducto() <<" (Nodo "<<nodoDestino->getIdNodo()<<")"
              << " (Posición " << nodoDestino->getPosicionProducto()+1 << ")"
              << " - Feromona: " << feromona 
              << " - Costo (heurística): " << costo << endl;
@@ -62,46 +67,70 @@ public:
         return nodoDestino;
     }
     
-    double getHeuristica(Producto& productoDestino, const Coordenada& coordenadasNodoDestino, const map<Coordenada, Espacio>& espacios) const {
+        
+    double calcularDistanciaEuclidiana(double x1, double y1, double x2, double y2)const {
+        return sqrt(pow(x2 - x1, 2) + pow(y2 - y1, 2));
+    }
+
+    
+    double calcularProximidadPuertaProducto( Vehiculo& vehiculo,  Coordenada& posicionProducto,  Producto& productoDestino) const{
+        Coordenada puerta(vehiculo.getLargo(), vehiculo.getAncho() / 2.0);
+        double distancia = this->calcularDistanciaEuclidiana(
+            puerta.x, puerta.y,
+            posicionProducto.x, posicionProducto.y
+        );
+        int ordenEntrega = productoDestino.getOrden();
+        return distancia * (1.0 / ordenEntrega);  // Consistente con la fórmula del fitness
+    }
+    
+    double getHeuristica(Producto& productoDestino, Coordenada& coordenadasNodoDestino, map<Coordenada, Espacio>& espacios, Vehiculo &vehiculo) {
         double heuristica = 1.0;  // Valor neutro inicial
-        bool espacioEncontrado = false;
 
-        // Verificar colisión con cada espacio en el mapa
-        for (const pair<Coordenada, Espacio>& entry : espacios) {
-            Coordenada coordExistente = entry.first;
-            const Espacio& espacioExistente = entry.second;
+        // 1. Calcular penalización por proximidad a la puerta
+        double penalizacionPuerta = calcularProximidadPuertaProducto(vehiculo, coordenadasNodoDestino, productoDestino);
 
-            // Usar la función hayColision para verificar superposición
-            if (hayColision(coordExistente, espacioExistente, coordenadasNodoDestino, productoDestino)) {
-                espacioEncontrado = true;
+        // 2. Verificar impacto en el balance del vehículo (baja ponderación)
+        double desbalancePeso = this->calcularDesbalancePeso(espacios,vehiculo) * 0.1; // Reducir el impacto del balance
 
-                // Calcular ajuste volumétrico
-                double ajusteVolumetrico = calcularAjusteVolumetrico(productoDestino, espacioExistente);
+        // Ajustar heurística combinando penalizaciones
+        heuristica *= (1.0 / (1.0 + penalizacionPuerta));  // Penalización por proximidad
+        heuristica *= (1.0 / (1.0 + desbalancePeso));      // Penalización leve por desbalance
+                
+//        cout<<heuristica<<endl;
+        
+        return heuristica;
+    }
+    
+    double calcularDesbalancePeso(const map<Coordenada, Espacio>& espacios,const Vehiculo& vehiculo) {
+        double pesoFrontal = 0.0;
+        double pesoTrasero = 0.0;
 
-                // Calcular espacio restante en el espacio destino
-                double espacioRestante = calcularEspacioRestante(productoDestino, espacioExistente);
+        // Definimos un límite en el eje X para dividir la parte frontal de la trasera
+        double limiteFrontal = vehiculo.getLargo() / 2.0;
 
-                // Verificar compatibilidad de apilamiento
-                if (!espacioExistente.esApilable(&productoDestino)) {
-                    // Penalización fuerte si no se puede apilar en este espacio
-                    heuristica = 0.1;  // Valor bajo para penalizar fuertemente esta opción
-                } else {
-                    // Si es apilable, calculamos la heurística normalmente
-                    double compatibilidadApilamiento = espacioExistente.estaVacio() ? 0.6 : 0.8;
+        for (map<Coordenada, Espacio>::const_iterator it = espacios.begin(); it != espacios.end(); ++it) {
+            const Coordenada& coord = it->first;
+            const Espacio& espacio = it->second;
 
-                    // Ajuste de heurística combinando los factores
-                    heuristica = (ajusteVolumetrico * 0.4) + (espacioRestante * 0.3) + (compatibilidadApilamiento * 0.3);
-                }
-                break;
+            // Sumamos el peso de los productos en este espacio
+            double pesoEnEspacio = 0.0;
+            stack<Producto*> copiaPila = espacio.getPilaDeProductos();
+
+            while (!copiaPila.empty()) {
+                Producto* producto = copiaPila.top();
+                pesoEnEspacio += producto->getPeso();
+                copiaPila.pop();
+            }
+
+            // Usamos el eje X para clasificar el peso como frontal o trasero
+            if (coord.x < limiteFrontal) {
+                pesoFrontal += pesoEnEspacio;
+            } else {
+                pesoTrasero += pesoEnEspacio;
             }
         }
 
-        // En caso de no encontrar espacio apilable o colisionable, dar una heurística neutra
-        if (!espacioEncontrado) {
-            heuristica = 1.0;  // Valor neutro en caso de no encontrar colisión o apilamiento
-        }
-
-        return heuristica;
+        return abs(pesoFrontal - pesoTrasero);
     }
 
     
@@ -136,27 +165,28 @@ public:
     bool hayColision(const Coordenada& coordExistente, const Espacio& espacioExistente, const Coordenada& coordNueva, const Producto& productoNuevo) const {
         double xExistente = coordExistente.x;
         double yExistente = coordExistente.y;
-        double zExistente = espacioExistente.getalturaActual();
+//        double zExistente = espacioExistente.getalturaActual();
 
         double largoExistente = espacioExistente.getLargo();
         double anchoExistente = espacioExistente.getAncho();
-        double alturaExistente = espacioExistente.getalturaMax();
+//        double alturaExistente = espacioExistente.getalturaMax();
 
         double xNuevo = coordNueva.x;
         double yNuevo = coordNueva.y;
-        double zNuevo = 0;  // El producto nuevo empieza en el suelo del espacio o se apila
+//        double zNuevo = 0;  // El producto nuevo empieza en el suelo del espacio o se apila
 
         double largoNuevo = productoNuevo.getLargo();
         double anchoNuevo = productoNuevo.getAncho();
-        double alturaNuevo = productoNuevo.getAltura();
+//        double alturaNuevo = productoNuevo.getAltura();
 
         // Verificar colisión en los tres ejes: X, Y y Z
         bool colisionX = (xNuevo < (xExistente + largoExistente)) && ((xNuevo + largoNuevo) > xExistente);
         bool colisionY = (yNuevo < (yExistente + anchoExistente)) && ((yNuevo + anchoNuevo) > yExistente);
-        bool colisionZ = (zNuevo < (zExistente + alturaExistente)) && ((zNuevo + alturaNuevo) > zExistente);
+//        bool colisionZ = (zNuevo < (zExistente + alturaExistente)) && ((zNuevo + alturaNuevo) > zExistente);
 
         // Retornamos true si hay colisión en los tres ejes
-        return colisionX && colisionY && colisionZ;
+        return colisionX && colisionY;
+        
     }
 
 

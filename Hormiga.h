@@ -42,6 +42,10 @@ public:
         }
         cout << "Fin de la ruta" << endl;
     }
+    
+    bool getEsValida(){
+        return true;
+    }
 
     
     void agregarAristaSolucion(Arista *arista){
@@ -72,7 +76,7 @@ public:
     }
     
     void guardarProducto(Producto producto, Nodo* nodo) {
-        // Lógica para agregar el producto y espacio a la solución
+        // Lógica para agregar el producto
         solucionActual.agregarProducto(nodo, producto);
     }
     

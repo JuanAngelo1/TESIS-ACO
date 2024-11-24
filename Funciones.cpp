@@ -170,19 +170,19 @@ Solucion construirSolu(Grafo& grafo, vector<Producto>& productos, Hormiga& hormi
     Nodo* nodoActual = hormiga.obtenerNodoActual();
     
     bool encontrado=crearPrimerEspacio(hormiga,espacios,vehiculo.getAlto(),productos,vehiculo);
- 
+    
     //En caso no encuentre para
     if(!encontrado){
         hormiga.setValidez(false);
         return hormiga.obtenerSolucion();
     }
     
-    int i = 0, iterSinAvance = 0, maxIterSinAvance = 15;
+    int i = 0, iterSinAvance = 0, maxIterSinAvance = 40;
     bool soluEncontrada=false ,completa= false;
     
     // Recorre el grafo construyendo una solución
     while (!hormiga.esSolucionCompleta(productos) && iterSinAvance<maxIterSinAvance) {
-      
+//        cout<<"Entra"<<endl;
         vector<Arista*> aristasDisponibles = grafo.obtenerAristasDisponibles(nodoActual);
         vector<Arista*> aristasFiltradas = filtrarAristas(aristasDisponibles, productos, hormiga.obtenerSolucion());
                 
@@ -192,9 +192,8 @@ Solucion construirSolu(Grafo& grafo, vector<Producto>& productos, Hormiga& hormi
         }
         
         // Seleccionar una arista basado en probabilidades de feromona y heurística
-        Arista* aristaSeleccionada = calcularYSeleccionarArista(aristasFiltradas, espacios, productos, alpha, beta);
+        Arista* aristaSeleccionada = calcularYSeleccionarArista(aristasFiltradas, espacios, productos, alpha, beta,vehiculo);
         
-            
         if (!aristaSeleccionada) {
             cout << "No se pudo seleccionar una arista válida, terminando." << endl;
             break;
@@ -255,7 +254,7 @@ bool crearPrimerEspacio(Hormiga& hormiga, map<Coordenada, Espacio>& espacios, do
     
     Nodo* nodoActual = hormiga.obtenerNodoActual();
     Producto& producto = productos[nodoActual->getIdProducto() - 1];
-
+//    cout<<"ID: "<<producto.getIdProducto() <<"Primer Producto: "<<producto.getNombre()<<endl;
     double posX = nodoActual->getPosX();
     double posY = nodoActual->getPosY();
 
@@ -299,7 +298,7 @@ bool crearPrimerEspacio(Hormiga& hormiga, map<Coordenada, Espacio>& espacios, do
     // Agregar el nuevo espacio al mapa de espacios
     espacios.emplace(coordenada, nuevoEspacio);
     
-    return true;
+    return encontrado;
 }
 
 void crearNuevoEspacio(const Coordenada& coordenadas, map<Coordenada, Espacio>& espacios, Producto& producto,
@@ -422,11 +421,10 @@ bool cabeEnLimitesVehiculo(double posX, double posY, Producto& producto, Vehicul
 
 
 void actualizarFeromonasOffline(const Solucion& mejorSol, Grafo& grafo, double rho, double Q) {
-    // Calcular el incremento de feromonas basado en el fitness de la mejor solución
     double incFerom = mejorSol.getFitness()*Q;
     
-    if(incFerom<0)
-        incFerom=0;
+    if(incFerom<0)incFerom=0;
+
    
     // Recorrer todas las aristas del grafo para actualizar las feromonas
     for (Arista* arista : grafo.getAristas()) {
@@ -442,12 +440,13 @@ void actualizarFeromonasOffline(const Solucion& mejorSol, Grafo& grafo, double r
         }
 
         // Limita el valor de feromona para evitar sesgo extremo
-        if (nuevaFeromona > 15.0) { 
-            nuevaFeromona = 15.0;
+        if (nuevaFeromona > 50.0) { 
+            cout<<"avr"<<endl;
+            nuevaFeromona = 50.0;
         }
         
         if(nuevaFeromona< 0.01){
-            nuevaFeromona=0.1;
+            nuevaFeromona=0.01;
         }
 
         arista->setFeromona(nuevaFeromona);
@@ -497,7 +496,8 @@ void imprimirEspaciosSolucion(map<Coordenada, Espacio>& espaciosSolucion)  {
     }
 }
 
-Arista* calcularYSeleccionarArista(const vector<Arista*>& aristasDisponibles, map<Coordenada, Espacio>& espacios, vector<Producto>& productos, double alpha, double beta) {
+Arista* calcularYSeleccionarArista(const vector<Arista*>& aristasDisponibles, map<Coordenada, 
+        Espacio>& espacios, vector<Producto>& productos, double alpha, double beta, Vehiculo &vehiculo) {
     vector<double> probabilidades;
     double sumaProbabilidades = 0.0;
 
@@ -508,10 +508,15 @@ Arista* calcularYSeleccionarArista(const vector<Arista*>& aristasDisponibles, ma
         Coordenada coordenadasNodoDestino(nodoDestino->getPosX(), nodoDestino->getPosY());
 
         // Calcular la heurística para el nodo destino considerando la posición actual
-        double heuristica = arista->getHeuristica(productoDestino, coordenadasNodoDestino, espacios);
+        double heuristica = arista->getHeuristica(productoDestino, coordenadasNodoDestino, espacios,vehiculo);
 //        arista->setHeuristica(heuristica);
         // Probabilidad para la arista usando feromona y heurística
         double prob = pow(arista->getFeromona(), alpha) * pow(1.0 / heuristica, beta);
+//        
+//        cout<<"Feromona: "<<arista->getFeromona()<<endl;
+//        cout<<"Valor Heuristica: "<<pow(1.0 / heuristica, beta)<<endl;
+//        cout<<"Prob "<<prob<<endl;
+        
         probabilidades.push_back(prob);
         sumaProbabilidades += prob;  // Sumar la probabilidad
     }
@@ -544,6 +549,7 @@ vector<Arista*> filtrarAristas(const vector<Arista*>& aristasDisponibles, const 
 Arista* seleccionarArista(const vector<double>& probabilidades, const vector<Arista*>& aristasDisponibles) {
     // Generar un número aleatorio entre 0 y 1
     double random = static_cast<double>(rand()) / RAND_MAX;
+//    cout<<random<<endl;
     double probAcumulada = 0.0;
 
     // Recorrer todas las aristas y seleccionar la que corresponde a la probabilidad acumulada

@@ -45,7 +45,7 @@ Solucion construirSolu(Grafo& , vector<Producto>& , Hormiga& , double , double ,
 Arista* seleccionarArista(const vector<double>& , const vector<Arista*>& );
 
 Arista* calcularYSeleccionarArista(const vector<Arista*>& , map<Coordenada, Espacio>& ,
-        vector<Producto>& , double , double );
+        vector<Producto>& , double , double ,Vehiculo&);
 
 bool cabeEnLimitesVehiculo(double , double , Producto& , Vehiculo& );
 

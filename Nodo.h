@@ -36,7 +36,7 @@ public:
     
     
     void mostrarInfo() const {
-        cout << "Producto ID: " << idProducto << " - Posición: " << posicionProducto << 
+        cout <<"Nodo ID: "<< idNodo <<" - Producto ID: " << idProducto << " - Posición: " << posicionProducto + 1 << 
                 " - Coordenadas: (" << posX<< ", " << posY << ", " << posZ << ")" << endl;
     }
     

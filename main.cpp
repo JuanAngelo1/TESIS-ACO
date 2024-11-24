@@ -41,10 +41,10 @@ int main(int argc, char** argv) {
                             1, 0, 1,      // Lavadoras (tres modelos)
                             1, 0, 1,      // Microondas (tres modelos)
                             1, 0, 0, 1,   // Televisores (cuatro modelos)
-                            1, 0, 1, 1,   // Aspiradoras (cuatro modelos)
-                            1, 0, 0, 0,   // Hornos eléctricos (cuatro modelos)
-                            1, 0, 1, 1,   // Cocinas (cinco modelos)
-                            1, 1, 1};     // Licuadoras (tres modelos)
+                            1, 0, 0, 1,   // Aspiradoras (cuatro modelos)
+                            1, 0, 0, 1,   // Hornos eléctricos (cuatro modelos)
+                            1, 0, 0, 1,   // Cocinas (cinco modelos)
+                            1, 0, 0};     // Licuadoras (tres modelos)
     
     //Productos a cargar generados
     vector<Producto> productosCargar = generarProductos(productosBase,cantidad);
@@ -62,21 +62,23 @@ int main(int argc, char** argv) {
     double pesoMax= vehiculo.getPesoMaximo();
     double volMax= vehiculo.getVolMaximo();
     
-    int posxProducto=3;
+
     int numIter=0, sinMej=0,cantSoluciones=0;
     int cantNodos,numAristas;
     Solucion mejorSol;
     mejorSol.setFitness(-1000);
-    double alpha = 1.6, beta = 0.2;
-    double rho = 0.15; // Tasa de evaporación
-    double Q = 0.3; // Constante para el depósito de feromonas
+    double alpha = 1.5, beta = 2;
+    double rho = 0.2; // Tasa de evaporación
+    double Q = 0.5; // Constante para el depósito de feromonas
     
-    double coefEsta=0.2,coefApilamiento=0.3 ,coefProximidad= 0.4,coefAccesibilidad=0.2; 
-    int iterMax = 70, tolerancia = 30;
+    double coefEsta=0.4,coefApilamiento=0.2 ,coefProximidad= 0.4,coefAccesibilidad=1; 
+        
+    int posxProducto=10;
+    int iterMax = 30;
     
-    int numHormigas = 100;
+    int numHormigas = 50;
     
-    int numCorrida=0,corridasMax=1;
+    int numCorrida=0,corridasMax=30;
     
     unsigned t0, t1;
  
@@ -91,20 +93,22 @@ int main(int argc, char** argv) {
 //        productosCargar[i].mostrarInformacion();
 //    } 
     
-//    cout<<"Ancho: "<<vehiculo.getAncho()<<endl;
-//    cout<<"Largo: "<<vehiculo.getLargo()<<endl;
     while(numCorrida < corridasMax){
-        cout<<"Corrida "<< numCorrida+1<<endl;
         Grafo grafo;
         cantNodos=grafo.generarNodosAleatorios(productosCargar, maxX, maxY, posxProducto);
         numAristas=cantNodos*(cantNodos-1);
+        mejorSol.setFitness(-1000);
+//        cout<<"Cantidad Nodo: "<<cantNodos<<endl;
 
-        grafo.generarAristasAleatorias(numAristas,50);
-        grafo.conectarProductos(productosCargar.size(), posxProducto);
+        grafo.generarGrafoCompleto();
+
+        numIter=0,cantSoluciones=0;
         
-        numIter=0,sinMej=0;
-        
-        while(numIter < iterMax && sinMej < tolerancia){
+        vector<Solucion> solucionesCalibracion;
+        solucionesCalibracion.clear();
+//        grafo.mostrarGrafo();
+
+        while(numIter < iterMax){
 
             vector<Solucion> soluciones;
             Solucion mejorSolIter;
@@ -114,7 +118,7 @@ int main(int argc, char** argv) {
             vector<Hormiga> hormigas=colonia.getHormigas();
             Solucion solActual;
 
-            t0=clock();
+//            t0=clock();
 
             //Aqui las hormigas recorren el grafo
             for(int h = 0 ; h < numHormigas ; h++){
@@ -131,12 +135,17 @@ int main(int argc, char** argv) {
                     solActual.calcularFitness(vehiculo,coefEsta,coefApilamiento,coefProximidad,coefAccesibilidad,0);
                     soluciones.push_back(solActual);
                 }
+                
+//                if(cantSoluciones==0 &&)
             }
 
-            t1=clock();
+//            t1=clock();
 
             mejorSolIter = mejorSolucion(soluciones);
-            
+            if(soluciones.size()>0){
+                solucionesCalibracion.push_back(mejorSolIter);
+            }
+
             if(mejorSolIter.getFitness() > mejorSol.getFitness()){
                 mejorSol=mejorSolIter;
                 sinMej=0;
@@ -145,41 +154,37 @@ int main(int argc, char** argv) {
             
             // Actualiza las feromonas en el grafo usando la mejor solución
             actualizarFeromonasOffline(mejorSolIter, grafo, rho, Q); 
-
-            //PRUEBA CAJA BLANCA PARA ITERACIONES
-
-//            double fitnessProm=obtenerPromedio(soluciones);
-//            if(soluciones.size()>=1 ){
-//                cout<< "Corrida: "<<numCorrida + 1<<endl;
-//                cout <<"Iteración: " << numIter + 1<<endl;
-//                cout <<"Aristas Evaluadas: "<<contadorAristas<<endl;
-//                cout <<"Soluciones validas: "<<soluciones.size()<<endl;
-//                cout <<"Incremento Feromona Total: "<<incrementoFeromona<<endl;
-//                cout <<"Fitness Promedio: "<< fitnessProm<<endl;
-//                cout <<"Mejor Fitness Iteracion: "<< mejorSolIter.getFitness()<<endl;
-//                double time = (double(t1-t0)/CLOCKS_PER_SEC);
-//                cout << "Execution Time: " << time << endl;
-//                cout<<endl;
-//                solAnterior=mejorSolIter;
-//            }
-
-            // Limpiar los datos innecesarios en cada solución después de actualizar feromonas
-   
+            
             for (Solucion& sol : soluciones) {
                 sol.limpiarSolucion();
             }
             
             numIter++;
+                
         } 
-        cout<<"Cantidad Soluciones: "<< cantSoluciones<<endl;
+//        cout<<"Cantidad Soluciones: "<< cantSoluciones<<endl;
+//        if(cantSoluciones==0)
+//            corridasMax++;
+        
+//        cout<<"Mejor Solución:"<<endl;
+        cout<<"Mejor Fitness:"<<endl;
+        mejorSol.imprimirSolu();
+        double promedioCorrida=obtenerPromedio(solucionesCalibracion);
+        cout<<"Promedio Fitness:"<<endl;
+        cout<<promedioCorrida<<endl;
+        
+        
         numCorrida++;
     }
     
-    cout<<endl;
+//    cout<<endl;
     cout<<"Cantidad de Soluciones Encontradas: "<<cantSoluciones<<endl;
-    cout<<"Mejor Solución:"<<endl;
-    mejorSol.imprimirProductosCargados();
-    mejorSol.imprimirSolu();
-    mejorSol.imprimirEspaciosSolucion();
+//    cout<<"Mejor Solución:"<<endl;
+//    
+//    mejorSol.calcularFitness(vehiculo,coefEsta,coefApilamiento,coefProximidad,coefAccesibilidad,1);
+//    
+//    mejorSol.imprimirProductosCargados();
+//    mejorSol.imprimirSolu();
+//    mejorSol.imprimirEspaciosSolucion();
     
 }

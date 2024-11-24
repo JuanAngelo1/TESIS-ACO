@@ -123,31 +123,31 @@ public:
         double factorProximidad = (factorProx > 0) ? (1.0 / factorProx) * 100 *coefProximidad : 0.0;
 
         // Penalización por accesibilidad para el orden de entrega
-        double penalizacionAccesibilidad = calcularPenalizacionProximidadPuerta(vehiculo.getLargo(),vehiculo.getAncho()) * coefAccesibilidad*10;
+        double penalizacionAccesibilidad = calcularPenalizacionProximidadPuerta(vehiculo.getLargo(),vehiculo.getAncho()) * coefAccesibilidad;
         
         
         // Cálculo final del fitness
-        fitness = factorBonusApilamiento + factorProximidad - penalizacionAccesibilidad - factorDesbalancePeso + 10;
+        fitness = factorBonusApilamiento + factorProximidad - penalizacionAccesibilidad - factorDesbalancePeso;
 
         // Asignar el fitness a la solución actual
         setFitness(fitness);
         
-//        if(debug==1){
-//            
-//            cout<<"Bonus Apilamiento: "<<factorBonusApilamiento<<endl;
-//            cout<<"Cantidad Apilados: "<<calcularBonusApilamiento()<<endl;
-//
-//            cout<<"Bonus Proximidad: "<<factorProximidad<<endl;
-//            cout<<"Factor Proximidad:"<<factorProx<<endl;
-//
-//            cout<<"Penalización Accesibilidad: " << penalizacionAccesibilidad << endl;
-//            cout<<"Calculo Accesabildiad: "<< calcularPenalizacionProximidadPuerta(vehiculo.getLargo(),vehiculo.getAncho())<<endl;
-//
-//            cout<<"Penalizacion Desbalance: "<<factorDesbalancePeso<<endl;
-//            cout<<"Desbalance KG"<<calcularDesbalancePeso(vehiculo)<<endl;
-//
-//            cout<<"Fitness: "<<fitness<<endl;
-//        }
+        if(debug==1){
+            
+            cout<<"Bonus Apilamiento: "<<factorBonusApilamiento<<endl;
+            cout<<"Cantidad Apilados: "<<calcularBonusApilamiento()<<endl;
+
+            cout<<"Bonus Proximidad: "<<factorProximidad<<endl;
+            cout<<"Factor Proximidad:"<<factorProx<<endl;
+
+            cout<<"Penalización Accesibilidad: " << penalizacionAccesibilidad << endl;
+            cout<<"Calculo Accesabildiad: "<< calcularPenalizacionProximidadPuerta(vehiculo.getLargo(),vehiculo.getAncho())<<endl;
+
+            cout<<"Penalizacion Desbalance: "<<factorDesbalancePeso<<endl;
+            cout<<"Desbalance KG "<<calcularDesbalancePeso(vehiculo)<<endl;
+
+            cout<<"Fitness: "<<fitness<<endl;
+        }
 
 
     }
@@ -191,40 +191,36 @@ public:
 
     
     double calcularDesbalancePeso(const Vehiculo& vehiculo) {
-    double pesoFrontal = 0.0;
-    double pesoTrasero = 0.0;
+        double pesoFrontal = 0.0;
+        double pesoTrasero = 0.0;
 
-    // Definimos un límite en el eje X para dividir la parte frontal de la trasera
-    double limiteFrontal = vehiculo.getLargo() / 2.0;
+        // Definimos un límite en el eje X para dividir la parte frontal de la trasera
+        double limiteFrontal = vehiculo.getLargo() / 2.0;
 
-    for (map<Coordenada, Espacio>::const_iterator it = espaciosSolucion.begin(); it != espaciosSolucion.end(); ++it) {
-        const Coordenada& coord = it->first;
-        const Espacio& espacio = it->second;
+        for (map<Coordenada, Espacio>::const_iterator it = espaciosSolucion.begin(); it != espaciosSolucion.end(); ++it) {
+            const Coordenada& coord = it->first;
+            const Espacio& espacio = it->second;
 
-        // Sumamos el peso de los productos en este espacio
-        double pesoEnEspacio = 0.0;
-        stack<Producto*> copiaPila = espacio.getPilaDeProductos();
-        
-        while (!copiaPila.empty()) {
-            Producto* producto = copiaPila.top();
-            pesoEnEspacio += producto->getPeso();
-            copiaPila.pop();
+            // Sumamos el peso de los productos en este espacio
+            double pesoEnEspacio = 0.0;
+            stack<Producto*> copiaPila = espacio.getPilaDeProductos();
+
+            while (!copiaPila.empty()) {
+                Producto* producto = copiaPila.top();
+                pesoEnEspacio += producto->getPeso();
+                copiaPila.pop();
+            }
+
+            // Usamos el eje X para clasificar el peso como frontal o trasero
+            if (coord.x < limiteFrontal) {
+                pesoFrontal += pesoEnEspacio;
+            } else {
+                pesoTrasero += pesoEnEspacio;
+            }
         }
 
-        // Usamos el eje X para clasificar el peso como frontal o trasero
-        if (coord.x < limiteFrontal) {
-            pesoFrontal += pesoEnEspacio;
-        } else {
-            pesoTrasero += pesoEnEspacio;
-        }
+        return abs(pesoFrontal - pesoTrasero);
     }
-
-    // Debugging para verificar los pesos en cada solución
-//    cout << "Debug - Peso Frontal: " << pesoFrontal << ", Peso Trasero: " << pesoTrasero << endl;
-
-    // Calculamos el desbalance como la diferencia absoluta
-    return abs(pesoFrontal - pesoTrasero);
-}
 
     bool esNodoValido(Nodo* nodo, Producto producto) {
         for (const Nodo* nodoOcupado : nodosOcupados) {
@@ -317,13 +313,13 @@ public:
     
     void imprimirSolu() const{
         
-        cout<<"Peso Cargado: "<< pesoTotalCargado <<endl;
-        cout<<"Peso Restante: "<< pesoRestante <<endl<<endl;
-
-        cout<<"Volumen Cargado: "<< volumenTotalCargado<<endl;
-        cout<<"Volumen Restante: "<< volRestante <<endl<<endl;
+//        cout<<"Peso Cargado: "<< pesoTotalCargado <<endl;
+//        cout<<"Peso Restante: "<< pesoRestante <<endl<<endl;
+//
+//        cout<<"Volumen Cargado: "<< volumenTotalCargado<<endl;
+//        cout<<"Volumen Restante: "<< volRestante <<endl<<endl;
         
-        cout<<"Fitness Solución: "<< fitness <<endl;
+        cout<<fitness <<endl;
     }
    
 
