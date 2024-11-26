@@ -33,22 +33,23 @@ int main(int argc, char** argv) {
     //Inicializar Flotas Vehículos
     vector<Vehiculo> listaVehiculos = obtenerVehiculos();
     
-    //Inicializar Productos Base
-    vector<Producto> productosBase = obtenerProductosBase();
-    
-    //Inicializar cantidades para pedido prueba
-    vector<int> cantidad = {1, 0, 0, 1,   // Refrigeradoras (cuatro)
-                            1, 0, 1,      // Lavadoras (tres modelos)
-                            1, 0, 1,      // Microondas (tres modelos)
-                            1, 0, 0, 1,   // Televisores (cuatro modelos)
-                            1, 0, 0, 1,   // Aspiradoras (cuatro modelos)
-                            1, 0, 0, 1,   // Hornos eléctricos (cuatro modelos)
-                            1, 0, 0, 1,   // Cocinas (cinco modelos)
-                            1, 0, 0};     // Licuadoras (tres modelos)
-    
-    //Productos a cargar generados
-    vector<Producto> productosCargar = generarProductos(productosBase,cantidad);
-    
+//    //Inicializar Productos Base
+//    vector<Producto> productosBase = obtenerProductosBase();
+//    
+//    //Inicializar cantidades para pedido prueba
+//    vector<int> cantidad = {1, 0, 1, 1,   // Refrigeradoras (cuatro)
+//                            1, 0, 1,      // Lavadoras (tres modelos)
+//                            1, 0, 1,      // Microondas (tres modelos)
+//                            1, 0, 1, 1,   // Televisores (cuatro modelos)
+//                            1, 0, 0, 1,   // Aspiradoras (cuatro modelos)
+//                            1, 0, 0, 1,   // Hornos eléctricos (cuatro modelos)
+//                            1, 0, 1, 1,   // Cocinas (cinco modelos)
+//                            1, 0, 1};     // Licuadoras (tres modelos)
+//    
+//    vector<Producto> productosCargar = generarProductos(productosBase,cantidad);
+         
+    vector<Producto> productosCargar=leerArchivoProductos("set14.csv");
+
     //Inicializar Pedidos
     Pedido pedido1(1, productosCargar, 8, "alta");
     
@@ -67,18 +68,18 @@ int main(int argc, char** argv) {
     int cantNodos,numAristas;
     Solucion mejorSol;
     mejorSol.setFitness(-1000);
-    double alpha = 1.5, beta = 2;
-    double rho = 0.2; // Tasa de evaporación
+    double alpha = 1, beta = 2;
+    double rho = 0.3; // Tasa de evaporación
     double Q = 0.5; // Constante para el depósito de feromonas
     
     double coefEsta=0.4,coefApilamiento=0.2 ,coefProximidad= 0.4,coefAccesibilidad=1; 
         
     int posxProducto=10;
-    int iterMax = 30;
+    int iterMax = 20;
+   
+    int numHormigas = 60;
     
-    int numHormigas = 50;
-    
-    int numCorrida=0,corridasMax=30;
+    int numCorrida=0,corridasMax=10;
     
     unsigned t0, t1;
  
@@ -93,7 +94,11 @@ int main(int argc, char** argv) {
 //        productosCargar[i].mostrarInformacion();
 //    } 
     
+    Solucion solExpNum;
+    solExpNum.setFitness(-1000);
+    
     while(numCorrida < corridasMax){
+//        cout<<"Corrida: "<<numCorrida+1<<endl;
         Grafo grafo;
         cantNodos=grafo.generarNodosAleatorios(productosCargar, maxX, maxY, posxProducto);
         numAristas=cantNodos*(cantNodos-1);
@@ -135,8 +140,6 @@ int main(int argc, char** argv) {
                     solActual.calcularFitness(vehiculo,coefEsta,coefApilamiento,coefProximidad,coefAccesibilidad,0);
                     soluciones.push_back(solActual);
                 }
-                
-//                if(cantSoluciones==0 &&)
             }
 
 //            t1=clock();
@@ -159,30 +162,27 @@ int main(int argc, char** argv) {
                 sol.limpiarSolucion();
             }
             
+            
+//            mejorSolIter.imprimirSolu();
+            
             numIter++;
                 
-        } 
-//        cout<<"Cantidad Soluciones: "<< cantSoluciones<<endl;
-//        if(cantSoluciones==0)
-//            corridasMax++;
-        
-//        cout<<"Mejor Solución:"<<endl;
-        cout<<"Mejor Fitness:"<<endl;
+        }         
         mejorSol.imprimirSolu();
-        double promedioCorrida=obtenerPromedio(solucionesCalibracion);
-        cout<<"Promedio Fitness:"<<endl;
-        cout<<promedioCorrida<<endl;
         
+        if(solExpNum.getFitness() < mejorSol.getFitness()){
+            solExpNum=mejorSol;
+        }
         
         numCorrida++;
     }
+
+//    cout<<"Cantidad de Soluciones Encontradas: "<<cantSoluciones<<endl;
+    cout<<"Mejor Solución:"<<endl;
+    solExpNum.imprimirSolu();
     
-//    cout<<endl;
-    cout<<"Cantidad de Soluciones Encontradas: "<<cantSoluciones<<endl;
-//    cout<<"Mejor Solución:"<<endl;
-//    
 //    mejorSol.calcularFitness(vehiculo,coefEsta,coefApilamiento,coefProximidad,coefAccesibilidad,1);
-//    
+    
 //    mejorSol.imprimirProductosCargados();
 //    mejorSol.imprimirSolu();
 //    mejorSol.imprimirEspaciosSolucion();

@@ -319,7 +319,8 @@ public:
 //        cout<<"Volumen Cargado: "<< volumenTotalCargado<<endl;
 //        cout<<"Volumen Restante: "<< volRestante <<endl<<endl;
         
-        cout<<fitness <<endl;
+//        cout<<"Fitness: " <<fitness <<endl;
+          cout<<fitness <<endl;
     }
    
 

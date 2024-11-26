@@ -24,6 +24,8 @@ enum ResultadoEspacio {
     ESPACIO_INVALIDO
 };
 
+vector<Producto> leerArchivoProductos(const char* nombreArchivo);
+
 int obtenerCantidad(vector<Producto> productos);
 
 Vehiculo SeleccionarVehiculo(Pedido , vector<Vehiculo>);

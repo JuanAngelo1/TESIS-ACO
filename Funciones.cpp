@@ -12,6 +12,7 @@
 #include <string>
 #include <map>
 #include <algorithm>
+#include <cstdlib> // Para atoi y atof
 
 #include "Variables.h"
 #include "Funciones.h"
@@ -22,6 +23,42 @@
 #include "Producto.h"
 
 using namespace std;
+
+vector<Producto> leerArchivoProductos(const char* nombreArchivo) {
+    ifstream arch(nombreArchivo, ios::in);
+    if (!arch) {
+        cout << "ERROR: no se pudo abrir el archivo " << nombreArchivo << endl;
+        exit(1);
+    }
+
+    vector<Producto> productos;
+    string nombre;
+    char name[200];
+    int id;
+    double largo,ancho,alto,pesoMax,peso;
+    double lat,lon;
+    char c;
+    while (1){
+        arch>>id;
+        if(arch.eof())break;
+        arch.get();
+        arch.getline(name,200,',');
+        arch>>peso>>c;
+        arch>>largo>>c>>ancho>>c>>alto>>c>>pesoMax>>c;
+        arch>>lat>>c>>lon;
+        arch.get();
+        
+        nombre=name;
+        Producto producto(id,nombre,peso,largo,ancho,alto,pesoMax,lat,lon);
+        // Agregar el producto al vector
+        productos.push_back(producto);
+    }
+
+    arch.close();
+    return productos;
+}
+
+
 
 int obtenerCantidad(vector<Producto> productos){
     int i=0;
@@ -62,6 +99,7 @@ vector<Producto> obtenerProductosBase() {
     productosBase.push_back(Producto(602, "Horno Eléctrico Modelo 2", 7.10, 0.43, 0.51, 0.41, 6, -12.054500, -77.117600)); // Callao
     productosBase.push_back(Producto(603, "Horno Eléctrico Modelo 3", 7.25, 0.43, 0.52, 0.38, 6, -12.079270, -77.063227)); // Pueblo Libre
     productosBase.push_back(Producto(604, "Horno Eléctrico Modelo 4", 7.50, 0.42, 0.42, 0.36, 6, -12.122452, -77.031293)); // Miraflores
+    productosBase.push_back(Producto(605, "Horno Eléctrico Empotrable Indurama HEI-75V2NET", 31.0, 0.57, 0.59, 0.59 , 20, -12.041548, -77.142166));
 
     productosBase.push_back(Producto(701, "Cocina Klimatic Munchen", 26.6, 0.552, 0.495, 0.85, 15, -12.097622, -77.036002)); // San Isidro
     productosBase.push_back(Producto(702, "Cocina MABE EMP5120GP1", 24.5, 0.540, 0.52, 0.915, 15, -12.085846, -76.971214)); // La Molina
@@ -71,6 +109,18 @@ vector<Producto> obtenerProductosBase() {
     productosBase.push_back(Producto(801, "Licuadora Miray LIM-9", 1.3, 0.133, 0.22, 0.35, 0, -12.134781, -77.014236)); // Surquillo
     productosBase.push_back(Producto(802, "Licuadora Oster 250-22", 3.74, 0.23, 0.19, 0.335, 0, -12.140356, -76.985933)); // Surco
     productosBase.push_back(Producto(803, "Licuadora Thomas TH-780VR", 4.7, 0.22, 0.29, 0.38, 0, -12.158560, -76.989342)); // San Juan de Miraflores
+    
+    productosBase.push_back(Producto(901, "Cafetera Oster Prima Latte", 5.0, 0.32, 0.22 , 0.28, 5.0, -12.065700, -77.101260));
+    productosBase.push_back(Producto(902, "Cafetera Electrolux ECM30", 6.85, 0.26, 0.32, 0.35 , 6.0, -12.143153, -77.128616));
+    productosBase.push_back(Producto(903, "Cafetera Frappé Oster BVSTDC03B-053", 6.85, 0.26, 0.32, 0.35 , 6.0, -12.103733, -77.187358));
+    
+    productosBase.push_back(Producto(1001, "Parrilla Eléctrica Oster CKSTGR3006", 4.6, 0.17, 0.48, 0.38, 0, -12.109781, -77.073338));
+    productosBase.push_back(Producto(1002, "Grill Parrillero Miray GPM-15", 2.6, 0.27, 0.52, 0.10 , 0.0, -12.057776, -77.184214));
+    productosBase.push_back(Producto(1003, "Grill Oster CKSTGR4768-053", 2.7, 0.45, 0.32, 32.2, 0.0, -12.075262, -77.154321));
+
+    productosBase.push_back(Producto(1101, "Lavavajillas Frigidaire GDPH-4515AF", 29.0, 0.62, 0.61, 0.85, 30.0, -12.160750,	-77.123898));
+    productosBase.push_back(Producto(1102, "Lavavajillas Electrolux - EHFE14T2MSBXB", 48.0, 0.61, 0.60, 0.84, 40.0, -11.995199, -77.176887));
+    productosBase.push_back(Producto(1103, "Lavavajilla SOLE - STILUX MAX SOLLAVAJ001V2", 45.0, 0.60, 0.60, 0.84, 40.0, -12.057169, -76.999832));
 
     return productosBase;
 }
